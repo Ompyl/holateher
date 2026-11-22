@@ -2,96 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1b262b">
   <title>holateher – freight trains live</title>
   <meta name="description" content="Live map of freight trains in Hungary (data: realtimenext.hu)">
+  <link rel="icon" href="favicon.svg?v=20261122f" type="image/svg+xml">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261122f">
 </head>
 <body>
-  <header id="bar">
-    <div class="brand">
-      <a class="logo" href="./">holateher</a>
-    </div>
+  <div id="map"></div>
+
+  <!-- phone: menu button; the header bar below becomes its fold-out menu -->
+  <button id="menuBtn" class="menubtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="bar">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+  </button>
+
+  <header id="bar" class="glass">
+    <a class="logo" href="./">holateher</a>
     <div id="counts" class="counts">loading …</div>
     <div id="clock" class="clock"></div>
     <div class="tools">
       <label class="toggle" title="Show known freight locos that currently have no train (faint)">
-        <input type="checkbox" id="showIdle"> idle freight locos
+        <input type="checkbox" id="showIdle"><span>idle freight locos</span>
       </label>
       <label class="toggle" title="Also show passenger trains (smaller, behind the freight trains)">
-        <input type="checkbox" id="showPass"> passenger trains
+        <input type="checkbox" id="showPass"><span>passenger trains</span>
       </label>
-      <button id="btnTable" type="button" title="Table of known freight locos">Locos</button>
+      <button id="btnTable" type="button" title="Table of known freight locos">Locos<span class="phone-only">(table)</span></button>
       <button id="btnGoogle" class="iconbtn" type="button" title="Open the current view in Google Maps" aria-label="Open in Google Maps">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"/></svg>
+        <span class="phone-only">Open in Google Maps ↗</span>
       </button>
       <button id="btnOrm" class="iconbtn" type="button" title="Open the current view in OpenRailwayMap" aria-label="Open in OpenRailwayMap">
         <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8.5 2 6 22M15.5 2 18 22"/><path d="M6.6 5.5h10.8M6.1 10h11.8M5.6 14.5h12.8M5.1 19h13.8" stroke-width="1.6"/></g></svg>
+        <span class="phone-only">Open in OpenRailwayMap ↗</span>
       </button>
     </div>
   </header>
 
-  <!-- phone: menu button + fold-out menu instead of the header bar -->
-  <button id="menuBtn" class="menubtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-  </button>
-  <nav id="menu" class="menu" hidden>
-    <div class="menu-head"><strong>holateher</strong><span id="mClock" class="menu-clock"></span></div>
-    <div id="mCounts" class="menu-counts">loading …</div>
-    <label class="menu-item toggle"><input type="checkbox" id="mShowIdle"> Idle freight locos</label>
-    <label class="menu-item toggle"><input type="checkbox" id="mShowPass"> Passenger trains</label>
-    <button type="button" class="menu-item" data-menu="table">Locos (table)</button>
-    <button type="button" class="menu-item" data-menu="google">Open in Google Maps ↗</button>
-    <button type="button" class="menu-item" data-menu="orm">Open in OpenRailwayMap ↗</button>
-  </nav>
-
-  <div id="map"></div>
   <div id="status" class="status"></div>
 
-  <!-- info panel of the selected train -->
-  <aside id="panel" class="panel" hidden>
+  <!-- info panel of the selected loco: desktop right, phone compact at the top -->
+  <aside id="panel" class="panel glass" hidden>
     <button class="close" id="panelClose" type="button" aria-label="Close">×</button>
     <div id="panelBody"></div>
   </aside>
 
-  <!-- table of known freight locos (window in the middle, map stays visible around it) -->
-  <div id="tableBackdrop" class="backdrop" hidden></div>
-  <section id="tableView" class="tableview" hidden>
-    <div class="tablehead">
-      <h2>Known freight locos</h2>
-      <input id="tableFilter" type="search" placeholder="Filter (number, type, route …)">
-      <label class="toggle" title="Also show Kind, Registered and Route">
-        <input type="checkbox" id="allCols"> All columns
-      </label>
-      <button id="btnExport" type="button">Export to Excel</button>
-      <button id="tableClose" type="button" class="close" aria-label="Close">×</button>
-    </div>
-    <div class="tablewrap">
-      <table id="lokTable">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <p class="hint">Source: <code>data/loks.csv</code> in the repository, plus freight locos this browser has seen in the last 48 h (marked “new”).</p>
-  </section>
-
-  <!-- timeline of the selected loco (timeline.js) -->
+  <!-- timeline of the selected loco -->
   <div id="msg" class="msg" hidden></div>
-  <section id="dock" class="dock" hidden>
+  <section id="dock" class="dock glass" hidden>
     <div class="row">
-      <button id="btnPlay" class="play" type="button" title="Play / pause (Space) · from &quot;now&quot; it starts at the beginning · one position back / forward: , and .">▶</button>
+      <button id="btnPlay" class="play" type="button" title="Play / pause (Space) · from &quot;now&quot; it starts at the beginning · step: , and .">▶</button>
       <div id="time" class="time">--:--</div>
-      <button id="btnBackLive" class="livebtn" type="button" title="Back to the live position (L)"><span class="live-dot"></span>LIVE</button>
+      <button id="btnLive" class="livebtn" type="button" title="Back to the live position (L)"><span class="live-dot"></span>LIVE</button>
       <input id="slider" type="range" min="0" max="0" value="0" step="1" aria-label="Time">
-      <label class="speed" title="Playback speed in positions per second (Q slower, E faster, double-click = 8x)">
+      <label class="speed desk-only" title="Playback speed in positions per second (Q slower, E faster, double-click = 8x)">
         speed <input id="speed" type="range" min="0" max="1000" step="1"> <b id="speedVal">8x</b>
       </label>
     </div>
     <div class="row row2">
       <div class="daynav">
-        <button id="prevDay" type="button" title="Previous day with data (A)">‹</button>
+        <button id="prevDay" type="button" title="Previous day with data (A)" aria-label="Previous day">‹</button>
         <div class="calwrap">
           <button id="dayBtn" class="daybtn" type="button" title="Choose a day">
             <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></g></svg>
@@ -99,8 +71,9 @@
           </button>
           <div id="cal" class="cal" hidden></div>
         </div>
-        <button id="nextDay" type="button" title="Next day with data (D)">›</button>
+        <button id="nextDay" type="button" title="Next day with data (D)" aria-label="Next day">›</button>
       </div>
+      <button id="speedBtn" class="speedbtn phone-only" type="button" title="Playback speed (tap to change)" aria-label="Playback speed">8x</button>
       <div class="seg" id="rangeSeg" title="Which part of the route: the current train, or the last 24 h / days (ending now or with the chosen day)">
         <button type="button" data-n="0">This train</button>
         <button type="button" data-n="1">24 h</button>
@@ -108,22 +81,35 @@
         <button type="button" data-n="7">7 days</button>
         <button type="button" data-n="14">14 days</button>
       </div>
-      <button id="btnFit" type="button" title="Zoom to the whole route">Fit</button>
+      <button id="btnFit" class="desk-only" type="button" title="Zoom to the whole route">Fit</button>
       <div class="info" id="info"></div>
-      <button id="speedBtn" class="speedbtn" type="button" title="Playback speed (tap to change)" aria-label="Playback speed">8x</button>
     </div>
-    <div class="trains" id="trains"></div>
-    <div class="keys">Keys: <kbd>Space</kbd> play/pause · <kbd>,</kbd> <kbd>.</kbd> step · <kbd>A</kbd> <kbd>D</kbd> day · <kbd>Q</kbd> <kbd>E</kbd> speed · <kbd>L</kbd> live · <kbd>Esc</kbd> close</div>
+    <div class="trains desk-only" id="trains"></div>
+    <div class="keys desk-only">Keys: <kbd>Space</kbd> play/pause · <kbd>,</kbd> <kbd>.</kbd> step · <kbd>A</kbd> <kbd>D</kbd> day · <kbd>Q</kbd> <kbd>E</kbd> speed · <kbd>L</kbd> live · <kbd>Esc</kbd> close</div>
+  </section>
+
+  <!-- known freight locos -->
+  <div id="tableBackdrop" class="backdrop" hidden></div>
+  <section id="tableView" class="tableview" hidden>
+    <div class="tablehead">
+      <h2>Known freight locos</h2>
+      <input id="tableFilter" type="search" placeholder="Filter (number, type, route …)">
+      <label class="toggle" title="Also show Kind, Registered and Route"><input type="checkbox" id="allCols"> All columns</label>
+      <button id="btnExport" type="button">Export to Excel</button>
+      <button id="tableClose" type="button" class="close" aria-label="Close">×</button>
+    </div>
+    <div class="tablewrap">
+      <table id="lokTable"><thead></thead><tbody></tbody></table>
+    </div>
+    <p class="hint">Source: <code>data/loks.csv</code> in the repository, plus freight locos this browser has seen in the last 48 h (marked “new”).</p>
   </section>
 
   <footer class="credits">
-    Data: <a href="https://realtimenext.hu" target="_blank" rel="noopener">realtimenext.hu</a> ·
-    Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors
+    Data: <a href="https://realtimenext.hu" target="_blank" rel="noopener">realtimenext.hu ↗</a> ·
+    Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap ↗</a> contributors
   </footer>
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <script src="common.js"></script>
-  <script src="timeline.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="js/main.js?v=20261122f"></script>
 </body>
 </html>

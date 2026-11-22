@@ -12,7 +12,7 @@
 - **Loco table**: known freight locos with live status, filter, sorting and **export to Excel**.
 - Buttons to open the current view in **Google Maps** or **OpenRailwayMap**.
 
-Site: https://ompyl.github.io/holateher/ (once published)
+Site: https://ompyl.github.io/holateher/
 
 ## Maintaining the data
 
@@ -36,14 +36,22 @@ python -m http.server 8765
 
 ## Files
 
+Plain static site, no build step: ES modules loaded directly by the browser.
+
 | File | Purpose |
 |---|---|
-| `index.html`, `app.js` | live map, info panel, loco table |
-| `timeline.js` | timeline of the selected loco |
+| `index.html`, `style.css` | one page for desktop and phone (phone rules next to each component) |
+| `js/main.js` | start-up, wires the modules |
+| `js/api.js` | every request to realtimenext (with caches) |
+| `js/live.js` | live polling (10 s; paused in background tabs and after 10 min without interaction) |
+| `js/map.js`, `js/trail.js` | map, vehicle symbols, route / stop layers |
+| `js/track.js` | route calculations (speed, stops, trains) |
+| `js/timeline.js`, `js/calendar.js` | timeline of the selected loco |
+| `js/selection.js`, `js/table.js`, `js/menu.js` | info panel, loco table, header / phone menu |
+| `js/config.js`, `js/util.js`, `js/evn.js`, `js/state.js` | constants, helpers, vehicle numbers, shared state |
+| `tools/bump-version.mjs` | puts a new `?v=` on all own files – run before every deploy |
 | `history.html` | forwards old links to `./?loco=…` |
-| `common.js` | shared code: helpers, speed colours, stops, map layers |
-| `style.css` | styles of both pages |
 | `data/` | loco list and own image categories |
 | `PLAN.md` | plan and notes (German) |
 
-Data: realtimenext.hu (public, undocumented API). Map: OpenFreeMap / © OpenStreetMap contributors.
+Data: realtimenext.hu (public, undocumented API). Map: © OpenStreetMap contributors.

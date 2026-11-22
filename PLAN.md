@@ -6,36 +6,28 @@ Daten von realtimenext.hu. Reine statische Webseite auf GitHub Pages, keine eige
 - Online: https://ompyl.github.io/holateher/ · Repo: https://github.com/Ompyl/holateher (öffentlich, Branch `main`,
   Pages aus `main` / Root, Build ~1 min). GitHub-Account auf dem PC: `Ompyl` (gh CLI angemeldet).
 - Herkunft: Userscript `..\HUMAP\realtimenext-worldmap.user.js`, API-Wissen in `..\HUMAP\NOTIZEN.md`.
-- Stand dieser Datei: 22.11.2026 abends, nach einem langen Chat mit vielen Iterationen.
+- Stand dieser Datei: 22.11.2026 spätabends, nach dem Neubau im Branch `rewrite`.
 
 ---
 
-## ▶ Übergabe für den nächsten Chat: sauberer Neubau
+## ▶ Stand: sauberer Neubau im Branch `rewrite` (22.11.2026 abends)
 
-Emil will die Seite **neu und sauber schreiben**, mit allem, was in dieser Datei steht, von Anfang an bedacht.
-Die jetzige Fassung funktioniert und ist online (Commit `0c87c0a`), ist aber in vielen kleinen Schritten gewachsen
-(History-Seite → History-Modus → Zeitachse, nachträgliche Handy-Ansicht, viele CSS-Overrides).
+Die Seite wurde im Branch `rewrite` neu geschrieben (ES-Module, ein DOM für PC und Handy, Versionsnummern).
+Backup davor: `holateher-backup-2026-11-22-2148-vor-neubau`. **Noch nicht gepusht und nicht in `main`** –
+erst nach Emils OK. `main` enthält noch die alte Fassung (`app.js`, `timeline.js`, `common.js`).
 
-**Ziel des Neubaus:** gleicher Funktionsumfang wie unten unter „Funktionsumfang“, gleiches Aussehen („Design“),
-aber aufgeräumte Struktur. Vorschläge:
+Regeln für die Weiterarbeit:
+- **Vor jedem Push `node tools/bump-version.mjs`** – setzt eine neue `?v=` an alle eigenen Dateien und Imports
+  (auch in `index.html`). Nie Dateien mit unterschiedlicher Version mischen. `style.css` bekommt die Nummer über
+  `index.html`. Beim lokalen Testen nach Änderungen ebenfalls bumpen (sonst cached der Browser alte Module).
+- **MapLibre-Ausdrücke**: Zoom-`step`/`interpolate` immer ganz außen; nach `addLayer` die Konsole prüfen.
+- Ein Modul pro Thema (siehe „Dateien“). Alle Anfragen an realtimenext nur über `js/api.js`.
 
-1. **Vor dem Neubau ein Backup** (siehe „Backups“) und den Neubau in einem eigenen Branch oder Ordner machen,
-   erst nach Emils OK nach `main`.
-2. **Versionsnummern an alle eigenen Dateien** (`app.js?v=…`, `style.css?v=…`) oder ein einziges gebündeltes
-   Script. Mischungen aus altem und neuem Cache haben zweimal „keine Loks mehr“ verursacht.
-3. **Ein Modul pro Thema** statt großer Dateien: Daten (API, Cache, Live-Polling), Karte (Stil, Ebenen),
-   Auswahl/Infofeld, Zeitachse, Halte, Loco-Tabelle, Menü/Kopfzeile, Handy-Layout. ES-Module (`type="module"`)
-   gehen auf Pages ohne Build-Schritt.
-4. **Layout von Anfang an für PC und Handy** planen (Breakpoint 700 px), statt die Handy-Ansicht per Overrides
-   draufzusetzen. CSS-Variablen für Höhen (Kopfzeile, Leiste) statt Messen per JS, wo es geht.
-5. **MapLibre-Ausdrücke**: Zoom-`step`/`interpolate` muss immer ganz außen stehen (zweimal hineingefallen, siehe
-   „Stolpersteine“). Nach jedem `addLayer` die Konsole prüfen, der Fehler ist sonst stumm.
-6. Alles Englisch im Code und auf der Seite; Gespräch mit Emil auf Deutsch.
-
-**Noch nicht gepusht beim Wechsel:** Am Handy wird der Menüknopf ausgeblendet, solange die Loco-Tabelle offen ist
-(`body.table-open` in `showTable()`, CSS in der Handy-Media-Query). Im Neubau gleich mit einplanen.
-
----
+Bewusste Abweichungen vom alten Stand:
+- Handy-Menü = Kopfzeile (dasselbe Element, per CSS umgebaut) → nur ein Satz Schalter, kein Synchronisieren.
+- Handy-Leiste: Zeitraum-Knöpfe in eigener Zeile über die volle Breite, darunter „speed … · Zug“ (passte nicht
+  nebeneinander in 390 px). Loco-Tabelle am Handy: Aktions-Spalte klebt rechts, Rest seitlich scrollbar.
+- Fit/Zoom misst die echten Rechtecke von Kopfzeile, Infofeld und Leiste (keine eigene Handy-Verzweigung).
 
 ## Arbeitsweise und Wünsche von Emil
 
@@ -45,8 +37,12 @@ aber aufgeräumte Struktur. Vorschläge:
   echte Seite prüfen.
 - **Vor größeren Umbauten ein Backup** des Projektordners anlegen (Emil fragt danach).
 - Pläne erst zeigen, wenn Emil „plan das mal durch, mach noch nix“ sagt; bei Designfragen gern Varianten als Skizze zeigen.
-- Kleine Hobby-Seite: **realtimenext nicht mit Anfragen belasten** (Live-Liste nur alle 10 s, nur bei sichtbarem Tab,
-  vergangene Tage nur einmal laden). Die automatische Datensammlung (GitHub Action) erst bauen, **wenn der
+- Kleine Hobby-Seite: **realtimenext nicht mit Anfragen belasten**. Die Live-Liste ist ~0,9 MB und kommt
+  **unkomprimiert, ohne ETag** (`Cache-Control: no-cache`) → ein offener Tab = ~330 MB/h. Darum:
+  Live-Liste alle 10 s nur bei sichtbarem Tab **und Bedienung in den letzten 10 min** (sonst „paused (inactive)“,
+  nächste Maus-/Touch-/Tasten-Aktion lädt sofort weiter); heutiger Tag der gewählten Lok alle 60 s (Emil: so lassen);
+  vergangene Tage im Speicher auch über Lok-Wechsel hinweg (80 Tage, LRU); `history-days` und `vehicles/{evn}`
+  einmal pro Sitzung; Icon-Liste 24 h in localStorage. Die automatische Datensammlung (GitHub Action) erst bauen, **wenn der
   Entwickler von realtimenext geantwortet hat**.
 - Design dunkel lassen (siehe unten). Links zu fremden Seiten immer im neuen Tab (↗).
 - Öffentliches Repo: keine privaten Daten (IPs, Pfade mit Geheimnissen) in Dateien schreiben, die gepusht werden.
@@ -66,8 +62,8 @@ aber aufgeräumte Struktur. Vorschläge:
 - Höhe 60 px, leicht durchscheinend; die Karte läuft darunter durch.
 
 ### Live-Karte
-- Live-Liste alle 10 s, Pause wenn der Tab im Hintergrund ist (Status unten links „updated 19:02:17“ /
-  „paused (tab in background)“, am Handy ausgeblendet).
+- Live-Liste alle 10 s, Pause wenn der Tab im Hintergrund ist oder 10 min niemand bedient (Status unten links
+  „updated 19:02:17“ / „paused (tab in background)“ / „paused (inactive) …“; am Handy nur der Pause-Hinweis als Pille oben).
 - **Güterzüge:** `trainType === 'T'`, Symbol = Bild von realtimenext, Zugnummer darunter.
 - **Idle-Güterloks (blass, 45 %):** Loks ohne Zug, die in `data/loks.csv` stehen oder von diesem Browser in den
   letzten 48 h als Güterzug gesehen wurden (`localStorage holateher.seenFreight`).
@@ -236,7 +232,7 @@ Wahrheit statt der alten Ungarn.xlsx). Beschreibungen bleiben wie sie sind (teil
 `data/bildkategorien.csv`: `kategorie,bild` (noch leer).
 
 ### localStorage-Schlüssel
-`holateher.view`, `.showIdle`, `.showPassenger`, `.seenFreight`, `.modelIcons`, `.allCols`, `.playSpeed`.
+`holateher.view`, `.showIdle`, `.showPassenger`, `.seenFreight`, `.modelIcons`, `.allCols`, `.playSpeed`, `.icons` (Icon-Liste + Zeit).
 
 ---
 
@@ -294,22 +290,36 @@ Wahrheit statt der alten Ungarn.xlsx). Beschreibungen bleiben wie sie sind (teil
 - Testlinks: `?loco=918061932367&days=7` (Vectron 42408, fuhr bis Frankfurt/Ruhr/München),
   `?loco=918112932044` (Vectron 42082 Hodoš → Soroksári út), `?loco=915506300150&days=3` (Halte bei Szolnok,
   31 + 41 min werden zu 1 h 13 verschmolzen).
-- Offene Objekte zum Testen: `window.holateher` (`state`, `map`, `refreshLive`, `select(evn, {day, range, fit})`,
-  `unselect`, `tl`) und `holateher.tl` (`state`, `open`, `close`, `load`, `liveUpdate`, `setCursor`, `backToLive`, `fit`).
+- Offene Objekte zum Testen: `window.holateher` (`state`, `map`, `refresh`, `select(evn, {day, range, fit})`,
+  `unselect`, `api.stats` = Anzahl/Bytes der Anfragen, `tl` mit `state`, `load`, `setCursor`, `backToLive`, `fit`).
+- Nach Code-Änderungen `node tools/bump-version.mjs`, sonst lädt der Browser alte Module aus dem Cache.
 - Handygröße im eingebauten Browser: `resize_window` 390 × 760 (812 px hoch passt oft nicht ins Fenster).
 - Nach dem Testen Viewport zurück auf `desktop`; Test-Schalter (z. B. passenger) wieder auf Standard.
 
 ---
 
-## Dateien (jetzige Fassung)
+## Dateien (Neubau)
 
 | Datei | Inhalt |
 |---|---|
-| `index.html` | Kopfzeile, Handy-Menü, Karte, Infofeld, Loco-Tabelle, Zeitachsen-Leiste, Footer |
-| `app.js` | Live-Daten, Symbole, Zähler, Auswahl/Infofeld, Tooltip, Tabelle + Excel, Menü, Zurück-Taste, Uhr + Easter Egg |
-| `timeline.js` | `HTTimeline(map, {getLive, onLiveChange, onCloseRequest, onUrl})`: Laden/Bauen der Spur, Regler, LIVE, Kalender, Tasten |
-| `common.js` | `window.HT`: Helfer, EVN-Regeln, Kartenstil, Tempo/Halte-Berechnung, Spur-Ebenen, Legende, Links |
-| `style.css` | alles Aussehen; Handy-Teil am Ende (`@media (max-width: 700px)`) |
+| `index.html` | ein DOM für PC und Handy: Menüknopf, Kopfzeile (= Handy-Menü), Karte, Infofeld, Leiste, Tabelle, Footer |
+| `style.css` | alles Aussehen, nach Bausteinen; Handy-Regeln (`max-width: 700px`) direkt beim Baustein; `.desk-only` / `.phone-only` |
+| `js/main.js` | Start: statische Daten, Karte, Module verbinden, Esc, `--dock-h` per ResizeObserver, `?loco=`-Link |
+| `js/config.js` | Konstanten: API-Adressen, Zeiten, Farben, localStorage-Schlüssel, Kartenstil, Rechen-Grenzwerte |
+| `js/util.js` | Helfer (DOM, Datum, localStorage, CSV, Distanz) und kleiner Event-Hub `on`/`emit` |
+| `js/evn.js` | EVN-Format/Art/Land, Kurznummer, Links, Güterzug-Regel, Streckentext |
+| `js/api.js` | alle realtimenext-Anfragen + Caches |
+| `js/state.js` | gemeinsamer Zustand (Live-Liste, loks.csv, gesehene Güterloks, Schalter, Auswahl) |
+| `js/live.js` | Polling 10 s, Pause bei Hintergrund/Inaktivität, gesehene Güterloks merken |
+| `js/map.js` | Karte, gemerkter Ausschnitt, Fahrzeug-Ebene + Bilder, Tooltip, Klick, `fitCoords` |
+| `js/trail.js` | Spur-/Halte-/Marker-Ebenen, Regler-Deckkraft, Marker-Bild |
+| `js/track.js` | reine Rechnung: Tempo-Stücke, Halte (+ Verschmelzen), Zugliste, „This train“, Kennzahlen |
+| `js/timeline.js` | Zeitachse: Fenster laden, Live-Mitwachsen, Regler, Abspielen, LIVE, Tage, Tasten |
+| `js/calendar.js` | Kalender-Popover |
+| `js/selection.js` | Auswahl, Infofeld, Adresse `?loco=`, Zurück-Taste |
+| `js/table.js` | Loco-Tabelle + Excel-Export |
+| `js/menu.js` | Kopfzeile/Menü, Schalter, Zähler, Uhr + Easter Egg |
+| `tools/bump-version.mjs` | neue `?v=` an alle eigenen Dateien |
 | `history.html` | Weiterleitung alter Links |
 | `data/loks.csv`, `data/bildkategorien.csv`, `favicon.svg`, `README.md` (Englisch) | |
 
@@ -318,3 +328,4 @@ Wahrheit statt der alten Ungarn.xlsx). Beschreibungen bleiben wie sie sind (teil
 - `holateher-backup-2026-11-22-1830` – vor dem History-Modus
 - `holateher-backup-2026-11-22-1900` – mit History-Modus, vor der Zeitachse
 - `holateher-backup-2026-11-22-1930` – vor der Handy-Ansicht
+- `holateher-backup-2026-11-22-2148-vor-neubau` – alte Fassung vor dem Neubau (Branch `rewrite`)
