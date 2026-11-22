@@ -5,8 +5,8 @@
   'use strict';
   const {
     API, BASE_STYLE, EMPTY, $, esc, isEvn, fmtEvn, countryOf, kindOf, ymd, hhmm, lsGet, lsSet,
-    historyUrl, datasheetUrl, photosUrl, shortNo, getJSON, loadScript, parseCSV, dayPoints, buildSpeedGeo, buildStopGeo,
-    makeFallbackIcon, addTrailLayers, setTrail, legendHTML, openGoogle, openOrm
+    historyUrl, datasheetUrl, photosUrl, shortNo, getJSON, loadScript, parseCSV,
+    makeFallbackIcon, addTrailLayers, legendHTML, openGoogle, openOrm
   } = window.HT;
 
   // ------------------------------------------------------------------
@@ -15,7 +15,6 @@
   const LIVE_URL = API + 'bkv/vehicles/online/map';
   const ICONS_URL = API + 'admin/icons/bkv';
   const POLL_MS = 10000;              // same as map.realtimenext.hu
-  const TRAIL_REFRESH_MS = 60000;     // reload the selected train's route
   const IDLE_KEEP_MS = 48 * 3600e3;   // remember freight locos seen by this browser for 48 h
   const HU_VIEW = { center: [19.3, 47.2], zoom: 6.6 };
   const LS = { view: 'holateher.view', idle: 'holateher.showIdle', seen: 'holateher.seenFreight', modelIcons: 'holateher.modelIcons', allCols: 'holateher.allCols' };
@@ -34,7 +33,7 @@
     iconUrl: new Map(),       // realtimenext icon id -> URL
     loadedImg: new Set(),
     selected: null,
-    trailInfo: null,
+    imgByEvn: new Map(),      // EVN -> image id of its live symbol (reused for the timeline marker)
     timer: null
   };
 
@@ -51,6 +50,14 @@
   });
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
   map.on('moveend', () => lsSet(LS.view, { center: map.getCenter().toArray(), zoom: map.getZoom() }));
+
+  // Timeline of the selected loco (timeline.js). While its slider is not at "now", the other trains are hidden.
+  const tl = window.HTTimeline(map, {
+    getLive: evn => state.byEvn.get(evn),
+    onLiveChange: live => applyLiveFilter(live),
+    onCloseRequest: () => unselect(),
+    onUrl: (evn, day, range) => setUrl(evn, day, range)
+  });
 
   async function ensureImage(id, url) {
     if (state.loadedImg.has(id) || map.hasImage(id)) { state.loadedImg.add(id); return true; }
@@ -122,6 +129,7 @@
     if (Object.keys(modelIcons).length) lsSet(LS.modelIcons, modelIcons);
 
     const feats = [];
+    state.imgByEvn.clear();
     let nFreight = 0, nIdle = 0;
     for (const v of state.live) {
       if (!v.is_rail_uic || v.location_lat == null || v.location_lon == null) continue;
@@ -129,10 +137,11 @@
       const idle = !freight && state.showIdle && isIdleFreight(v);
       if (!freight && !idle) continue;
       freight ? nFreight++ : nIdle++;
+      state.imgByEvn.set(v.rail_uic, imageFor(v, modelCat));
       feats.push({
         type: 'Feature',
         geometry: { type: 'Point', coordinates: [v.location_lon, v.location_lat] },
-        properties: { evn: v.rail_uic, zug: v.trainNumber || '', idle: !freight, img: imageFor(v, modelCat), sel: v.rail_uic === state.selected }
+        properties: { evn: v.rail_uic, zug: v.trainNumber || '', idle: !freight, img: state.imgByEvn.get(v.rail_uic), sel: v.rail_uic === state.selected }
       });
     }
     return { fc: { type: 'FeatureCollection', features: feats }, nFreight, nIdle };
@@ -169,7 +178,7 @@
   }
 
   // Poll only while the tab is visible
-  function startPolling() { stopPolling(); refreshLive(); state.timer = setInterval(refreshLive, POLL_MS); }
+  function startPolling() { stopPolling(); state.timer = setInterval(refreshLive, POLL_MS); return refreshLive(); }
   function stopPolling() { if (state.timer) clearInterval(state.timer); state.timer = null; }
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') startPolling();
@@ -177,70 +186,40 @@
   });
 
   // ------------------------------------------------------------------
-  // Route travelled by the selected train
+  // Timeline helpers
   // ------------------------------------------------------------------
-  let trailToken = 0, trailTimer = null;
-
-  function clearTrail() {
-    trailToken++;
-    if (trailTimer) clearInterval(trailTimer);
-    trailTimer = null;
-    setTrail(map);
+  // Slider at "now": all trains; otherwise only the timeline marker of the selected loco
+  function applyLiveFilter(live) {
+    const none = ['==', ['get', 'evn'], ''];
+    map.setFilter('vehicles', live ? null : none);
+    map.setFilter('vehicle-sel', live ? ['==', ['get', 'sel'], true] : none);
   }
 
-  // From the first point with the current train number until now.
-  // If the train started before midnight, the previous day is added.
-  async function loadTrail(evn) {
-    const token = ++trailToken;
-    const v = state.byEvn.get(evn);
-    const zug = String(v?.trainNumber || '').trim();
-    const today = new Date();
-    let pts = await dayPoints(evn, ymd(today));
-    let start = zug ? pts.findIndex(p => String(p.route_id || '').trim() === zug) : -1;
-    if (zug && pts.length && (start === -1 || start === 0 || pts[start].time - pts[0].time < 1200)) {
-      const y = new Date(today); y.setDate(y.getDate() - 1);
-      const prev = await dayPoints(evn, ymd(y));
-      const ps = prev.findIndex(p => String(p.route_id || '').trim() === zug);
-      if (ps !== -1) { pts = prev.slice(ps).concat(pts); start = 0; }
-    }
-    if (token !== trailToken) return;            // another train selected meanwhile
-    if (!pts.length) { setTrail(map); state.trailInfo = { none: true }; renderPanel(); return; }
-    if (v && v.location_lat != null) {           // append current live position
-      const last = pts[pts.length - 1];
-      if (Math.abs(last.location_lat - v.location_lat) > 1e-6 || Math.abs(last.location_lon - v.location_lon) > 1e-6) {
-        pts.push({ location_lat: v.location_lat, location_lon: v.location_lon, time: Math.floor(Date.now() / 1000) });
-      }
-    }
-    if (start < 0) start = 0;
-    const coords = pts.map(p => [p.location_lon, p.location_lat]);
-    const times = pts.map(p => +p.time);
-    const trip = coords.slice(start), tripT = times.slice(start);
-    setTrail(map,
-      start > 0 ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: coords.slice(0, start + 1) } } : EMPTY,
-      trip.length > 1 ? buildSpeedGeo(trip, tripT) : EMPTY,
-      trip.length > 1 ? buildStopGeo(trip, tripT) : EMPTY);
-    state.trailInfo = { from: tripT[0], zug };
-    renderPanel();
+  // Address of the current view: ?loco=… while a loco is selected (can be shared)
+  function setUrl(evn, day, range) {
+    const url = evn ? historyUrl(evn, day, range) : location.pathname;
+    if (location.search !== (evn ? url : '')) history.replaceState(null, '', url);
   }
 
   // ------------------------------------------------------------------
   // Selection and info panel
   // ------------------------------------------------------------------
-  function select(evn) {
+  // opts: day / range for the timeline, fit = zoom to the route (from the table or a link)
+  function select(evn, o = {}) {
     state.selected = evn;
-    state.trailInfo = null;
+    state.panelHtml = null;
     $('panel').hidden = false;
     renderPanel();
     drawVehicles();
-    clearTrail();
-    loadTrail(evn);
-    trailTimer = setInterval(() => loadTrail(evn), TRAIL_REFRESH_MS);
+    tl.open(evn, { day: o.day, range: o.range, fit: o.fit, icon: state.imgByEvn.get(evn) });
   }
   function unselect() {
     state.selected = null;
     state.panelHtml = null;
     $('panel').hidden = true;
-    clearTrail();
+    tl.close();
+    applyLiveFilter(true);
+    setUrl(null);
     drawVehicles();
   }
 
@@ -260,10 +239,6 @@
     const title = freight ? 'Train ' + esc(v.trainNumber) : (v ? 'Loco without train' : 'Loco offline');
     const rel = freight ? (v.relation || '–') : lastFreightText(evn);
     const delay = v?.delayMin != null && freight ? (v.delayMin > 0 ? '+' + v.delayMin + ' min' : v.delayMin + ' min') : '–';
-    const ti = state.trailInfo;
-    const trailText = !ti ? '<span class="note">loading …</span>'
-      : ti.none ? '<span class="note">no positions today</span>'
-      : ti.zug ? 'of train ' + esc(ti.zug) + ' since ' + hhmm(ti.from) : 'today';
     const html = `
       <h3>${title}</h3>
       <div class="rel">${esc(rel)}</div>
@@ -277,11 +252,9 @@
         ${k?.beschreibung ? `<dt>Note</dt><dd>${esc(k.beschreibung)}${k.notiz ? ' · ' + esc(k.notiz) : ''}</dd>` : ''}
       </dl>
       <div class="actions">
-        <a class="btn" href="${historyUrl(evn, ymd(new Date()))}">History</a>
         <a class="btn" href="${datasheetUrl(evn)}" target="_blank" rel="noopener" title="Vehicle page on realtimenext.hu (new tab)">Datasheet ↗</a>
         <a class="btn" href="${photosUrl(evn)}" target="_blank" rel="noopener" title="Photos of “${esc(shortNo(evn))}” on bahnbilder.de (new tab)">Photos ↗</a>
       </div>
-      <div><strong>Route travelled</strong> ${trailText}</div>
       ${legendHTML(true)}`;
     // only rebuild when something changed (otherwise a click during an update could get lost)
     if (html !== state.panelHtml) { $('panelBody').innerHTML = html; state.panelHtml = html; }
@@ -360,7 +333,7 @@
       <tr>
         ${cols.map(c => cellHtml(c, r)).join('')}
         <td class="acts">
-          <a class="rowbtn" href="${historyUrl(r.evn)}" title="History" aria-label="History">${ICONS.history}</a>
+          <a class="rowbtn" href="${historyUrl(r.evn)}" data-hist="${r.evn}" title="History" aria-label="History">${ICONS.history}</a>
           <a class="rowbtn" href="${datasheetUrl(r.evn)}" target="_blank" rel="noopener" title="Vehicle page on realtimenext.hu (new tab)" aria-label="Info">${ICONS.info}</a>
           <a class="rowbtn" href="${photosUrl(r.evn)}" target="_blank" rel="noopener" title="Photos of “${esc(shortNo(r.evn))}” on bahnbilder.de (new tab)" aria-label="Photos">${ICONS.photos}</a>
           ${r.online ? `<button type="button" class="rowbtn" data-show="${r.evn}" title="Show on map" aria-label="Show on map">${ICONS.map}</button>` : '<span class="rowbtn ghost"></span>'}
@@ -428,6 +401,14 @@
       if (b) showOnMap(b.dataset.show);
     });
     $('panelClose').addEventListener('click', unselect);
+    // History icon in the table: select the loco and open its timeline (middle click = new tab with ?loco=…)
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[data-hist]');
+      if (!a || e.button !== 0 || e.ctrlKey || e.shiftKey || e.metaKey || e.altKey) return;
+      e.preventDefault();
+      showTable(false);
+      select(a.dataset.hist, { fit: true });
+    });
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
       if (!$('tableView').hidden) showTable(false);
@@ -487,9 +468,18 @@
   map.on('load', async () => {
     addLayers();
     await staticReady;
-    if (document.visibilityState === 'visible') startPolling();
+    let first = null;
+    if (document.visibilityState === 'visible') first = startPolling();
     else setStatus('paused (tab in background)');
+    // ?loco=…[&date=…][&days=…]: open that loco with its timeline (after the first live list)
+    const q = new URLSearchParams(location.search);
+    const evn = (q.get('loco') || '').replace(/\D/g, '');
+    if (isEvn(evn)) {
+      await first;
+      const days = +q.get('days');
+      select(evn, { day: q.get('date'), range: days > 1 ? days : undefined, fit: true });
+    }
   });
 
-  window.holateher = { state, map, refreshLive, select };
+  window.holateher = { state, map, refreshLive, select, unselect, tl };
 })();

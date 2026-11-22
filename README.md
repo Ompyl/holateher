@@ -4,10 +4,11 @@
 
 - **Live map** (`index.html`): only trains with train type `T` (teher = freight) from the live
   data of [realtimenext.hu](https://realtimenext.hu). Known freight locos without a train are shown faint.
-  Click a train to see the route it has travelled so far, coloured by speed, with stops.
-- **History** (`history.html?loco=<EVN>&date=<YYYYMMDD>`): the whole day of one loco with a
-  timeline slider, playback (1x–100x), list of the day's trains, day arrows (only days with data,
-  also ← / →) and a date picker.
+- **Timeline**: click a train → info panel plus a timeline at the bottom, starting at "now" (last 24 h,
+  or this train / 3 / 7 / 14 days). Move the slider back or press play to see where the loco was (the other
+  trains are hidden meanwhile); "Back to live" returns. Route coloured by speed, stops, list of trains,
+  day arrows (A / D) and a calendar for earlier days. Link: `?loco=<EVN>[&date=<YYYYMMDD>][&days=3|7|14]`
+  (old `history.html?…` links are forwarded).
 - **Loco table**: known freight locos with live status, filter, sorting and **export to Excel**.
 - Buttons to open the current view in **Google Maps** or **OpenRailwayMap**.
 
@@ -38,7 +39,8 @@ python -m http.server 8765
 | File | Purpose |
 |---|---|
 | `index.html`, `app.js` | live map, info panel, loco table |
-| `history.html`, `history.js` | history page |
+| `timeline.js` | timeline of the selected loco |
+| `history.html` | forwards old links to `./?loco=…` |
 | `common.js` | shared code: helpers, speed colours, stops, map layers |
 | `style.css` | styles of both pages |
 | `data/` | loco list and own image categories |

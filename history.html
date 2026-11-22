@@ -2,79 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>holateher – history</title>
-  <meta name="description" content="Daily history of a locomotive: route, speed, stops (data: realtimenext.hu)">
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
+  <!-- The history is now a mode of the live map: forward old links (history.html?loco=…) -->
+  <script>location.replace('./' + location.search + location.hash);</script>
 </head>
-<body class="history">
-  <header id="bar">
-    <div class="brand">
-      <a class="logo" href="./" title="Back to the live map">holateher</a>
-    </div>
-    <div class="hist-title">
-      <strong id="locoTitle">History</strong>
-      <span id="locoSub"></span>
-    </div>
-    <div class="tools">
-      <div class="daynav">
-        <button id="prevDay" type="button" title="Previous day with data (A)">‹</button>
-        <div class="calwrap">
-          <button id="dayBtn" class="daybtn" type="button" title="Choose a day">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></g></svg>
-            <span id="dayLabel">–</span>
-          </button>
-          <div id="cal" class="cal" hidden></div>
-        </div>
-        <button id="nextDay" type="button" title="Next day with data (D)">›</button>
-      </div>
-      <div class="seg" id="rangeSeg" title="How many days to show (ending with the chosen day)">
-        <button type="button" data-n="1"><span class="long">1 day</span><span class="short">1d</span></button>
-        <button type="button" data-n="3"><span class="long">3 days</span><span class="short">3d</span></button>
-        <button type="button" data-n="7"><span class="long">7 days</span><span class="short">7d</span></button>
-      </div>
-      <button id="btnFit" type="button" title="Zoom to the whole route">Fit</button>
-      <a id="btnSheet" class="btn" target="_blank" rel="noopener" title="Vehicle page on realtimenext.hu (new tab)">Datasheet ↗</a>
-      <a id="btnPhotos" class="btn" target="_blank" rel="noopener" title="Photos on bahnbilder.de (new tab)">Photos ↗</a>
-      <button id="btnGoogle" class="iconbtn" type="button" title="Open the current view in Google Maps" aria-label="Open in Google Maps">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"/></svg>
-      </button>
-      <button id="btnOrm" class="iconbtn" type="button" title="Open the current view in OpenRailwayMap" aria-label="Open in OpenRailwayMap">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8.5 2 6 22M15.5 2 18 22"/><path d="M6.6 5.5h10.8M6.1 10h11.8M5.6 14.5h12.8M5.1 19h13.8" stroke-width="1.6"/></g></svg>
-      </button>
-    </div>
-  </header>
-
-  <div id="map"></div>
-
-  <aside class="hist-legend"><div class="panel-inner" id="legend"></div></aside>
-
-  <div id="msg" class="msg" hidden></div>
-
-  <section class="dock">
-    <div class="row">
-      <button id="btnPlay" class="play" type="button" title="Play / pause (Space) · one position back / forward: , and .">▶</button>
-      <div id="time" class="time">--:--:--</div>
-      <input id="slider" type="range" min="0" max="0" value="0" step="1">
-      <label class="speed" title="Playback speed in positions per second (Q slower, E faster, double-click = 8x)">
-        speed <input id="speed" type="range" min="0" max="1000" step="1"> <b id="speedVal">8x</b>
-      </label>
-    </div>
-    <div class="info" id="info"></div>
-    <div class="trains" id="trains"></div>
-    <div class="keys">Keys: <kbd>Space</kbd> play/pause · <kbd>,</kbd> <kbd>.</kbd> step · <kbd>A</kbd> <kbd>D</kbd> day · <kbd>Q</kbd> <kbd>E</kbd> speed · arrow keys move the map</div>
-  </section>
-
-  <footer class="credits">
-    Data: <a href="https://realtimenext.hu" target="_blank" rel="noopener">realtimenext.hu</a> ·
-    Map: <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>
-    © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>
-  </footer>
-
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <script src="common.js"></script>
-  <script src="history.js"></script>
+<body>
+  <p><a href="./">holateher – live map</a></p>
 </body>
 </html>

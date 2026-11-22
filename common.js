@@ -36,7 +36,8 @@
   const durText = s => { const m = Math.round(s / 60); return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + pad(m % 60); };
   const lsGet = (k, def) => { try { const v = localStorage.getItem(k); return v === null ? def : JSON.parse(v); } catch (e) { return def; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } };
-  const historyUrl = (evn, day) => 'history.html?loco=' + encodeURIComponent(evn) + (day ? '&date=' + day : '');
+  // History mode of the live page (relative link, works on the live page and in the Excel export)
+  const historyUrl = (evn, day, days) => '?loco=' + encodeURIComponent(evn) + (day ? '&date=' + day : '') + (days > 1 ? '&days=' + days : '');
   const datasheetUrl = evn => 'https://realtimenext.hu/vehicles/' + encodeURIComponent(evn);   // opens in a new tab
   // Photos on bahnbilder.de: search for the short number as painted on the loco (e.g. "193 837"),
   // the full EVN rarely appears in captions. Can also find other vehicles with the same short number.
@@ -226,6 +227,14 @@
     map.setPaintProperty('trail-arrows', 'icon-opacity', op(0.85, 0));
   }
 
+  // Back to the live look: older parts fade (same values as in addTrailLayers)
+  function resetTrailCursor(map) {
+    const ageOpacity = (min, max) => ['interpolate', ['linear'], ['get', 'age'], 0, min, 1, max];
+    map.setPaintProperty('trail-line', 'line-opacity', ageOpacity(0.35, 0.75));
+    map.setPaintProperty('trail-gap', 'line-opacity', ageOpacity(0.3, 0.7));
+    map.setPaintProperty('trail-arrows', 'icon-opacity', ageOpacity(0.3, 0.85));
+  }
+
   function setTrail(map, dayLine, speed, stops) {
     map.getSource('trail-day')?.setData(dayLine || EMPTY);
     map.getSource('trail-speed')?.setData(speed || EMPTY);
@@ -255,6 +264,6 @@
     $, esc, isEvn, fmtEvn, countryOf, kindOf, pad, ymd, parseYmd, isoDate, hhmm, hhmmss, durText,
     lsGet, lsSet, historyUrl, datasheetUrl, photosUrl, shortNo, looksFreight, getJSON, loadScript, parseCSV, dayPoints,
     distM, buildSpeedGeo, buildStopGeo, makeArrowIcon, makeFallbackIcon,
-    addTrailLayers, setTrailCursor, setTrail, legendHTML, openGoogle, openOrm
+    addTrailLayers, setTrailCursor, resetTrailCursor, setTrail, legendHTML, openGoogle, openOrm
   };
 })();

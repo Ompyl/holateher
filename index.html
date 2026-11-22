@@ -59,6 +59,44 @@
     <p class="hint">Source: <code>data/loks.csv</code> in the repository, plus freight locos this browser has seen in the last 48 h (marked “new”).</p>
   </section>
 
+  <!-- timeline of the selected loco (timeline.js) -->
+  <div id="msg" class="msg" hidden></div>
+  <section id="dock" class="dock" hidden>
+    <div class="row">
+      <button id="btnPlay" class="play" type="button" title="Play / pause (Space) · from &quot;now&quot; it starts at the beginning · one position back / forward: , and .">▶</button>
+      <div id="time" class="time">--:--</div>
+      <button id="btnBackLive" class="livebtn" type="button" title="Back to the live position (L)">● LIVE</button>
+      <input id="slider" type="range" min="0" max="0" value="0" step="1" aria-label="Time">
+      <label class="speed" title="Playback speed in positions per second (Q slower, E faster, double-click = 8x)">
+        speed <input id="speed" type="range" min="0" max="1000" step="1"> <b id="speedVal">8x</b>
+      </label>
+    </div>
+    <div class="row row2">
+      <div class="daynav">
+        <button id="prevDay" type="button" title="Previous day with data (A)">‹</button>
+        <div class="calwrap">
+          <button id="dayBtn" class="daybtn" type="button" title="Choose a day">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></g></svg>
+            <span id="dayLabel">–</span>
+          </button>
+          <div id="cal" class="cal" hidden></div>
+        </div>
+        <button id="nextDay" type="button" title="Next day with data (D)">›</button>
+      </div>
+      <div class="seg" id="rangeSeg" title="Which part of the route: the current train, or the last 24 h / days (ending now or with the chosen day)">
+        <button type="button" data-n="0">This train</button>
+        <button type="button" data-n="1">24 h</button>
+        <button type="button" data-n="3">3 days</button>
+        <button type="button" data-n="7">7 days</button>
+        <button type="button" data-n="14">14 days</button>
+      </div>
+      <button id="btnFit" type="button" title="Zoom to the whole route">Fit</button>
+      <div class="info" id="info"></div>
+    </div>
+    <div class="trains" id="trains"></div>
+    <div class="keys">Keys: <kbd>Space</kbd> play/pause · <kbd>,</kbd> <kbd>.</kbd> step · <kbd>A</kbd> <kbd>D</kbd> day · <kbd>Q</kbd> <kbd>E</kbd> speed · <kbd>L</kbd> live · <kbd>Esc</kbd> close</div>
+  </section>
+
   <footer class="credits">
     Data: <a href="https://realtimenext.hu" target="_blank" rel="noopener">realtimenext.hu</a> ·
     Map: <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>
@@ -67,6 +105,7 @@
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="common.js"></script>
+  <script src="timeline.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

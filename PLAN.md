@@ -28,6 +28,20 @@ Letzter Commit beim Wechsel: siehe `git log`. GitHub-Account auf dem PC: `Ompyl`
   Nutzungsregeln: https://github.com/hiddewie/OpenRailwayMap-vector/blob/master/USAGE.md (öffentliche Seite + Quellenangabe).
   Beim nächsten Mal Cache-Busting (`common.js?v=…`) mitmachen.
 
+- **Zeitachse statt History-Modus (22.11. ~19:00, lokal; Backups: `..\holateher-backup-2026-11-22-1830` = vor dem
+  History-Modus, `..\holateher-backup-2026-11-22-1900` = mit History-Modus):** Klick auf einen Zug öffnet Infofeld **und**
+  unten die Leiste (`timeline.js`, `HTTimeline(map, {getLive, onLiveChange, onCloseRequest, onUrl})`; `history.js` gelöscht).
+  - Regler startet bei „jetzt“ (● LIVE), Standard **24 h** (letzte 24 h, der Vortag vorne abgeschnitten); Zeitraum
+    **This train · 24 h · 3 days · 7 days · 14 days** (wird nicht gespeichert, jede neue Lok startet mit 24 h).
+  - Regler zurück / Abspielen → andere Züge ausgeblendet (Filter auf der Ebene `vehicles`), Marker zeigt die Lok damals;
+    „Back to live“ / Taste L / ganz nach rechts → wieder live. ▶ bei „jetzt“ startet am Anfang der Zeitachse.
+  - Früherer Tag (‹ › / A D / Kalender): Fenster endet mit diesem Tag; „This train“ nur heute. Offline-Loks (z. B. aus
+    der Tabelle) öffnen ihren letzten Tag mit Daten, dann ohne LIVE.
+  - Heute wird jede Minute nachgeladen (Regler bleibt bei „jetzt“, wenn er dort war), vergangene Tage einmal pro Lok.
+  - Datasheet/Photos im Infofeld, Tage/Zeitraum/Fit in der Leiste (2. Zeile), Kalender öffnet nach oben.
+  - Adresse: `?loco=…[&date=…][&days=…]` (replaceState, teilbar); `history.html?…` leitet weiter. Esc / × schließt.
+  - Infofeld zeigt weiter die Live-Daten; Zug/Tempo zum Regler-Zeitpunkt stehen in der Leiste.
+
 ### Arbeitsweise / Wünsche von Emil
 
 - Emil schreibt Deutsch (locker, Tippfehler normal) → auf Deutsch antworten. **Die Webseite selbst ist komplett Englisch.**
@@ -39,9 +53,9 @@ Letzter Commit beim Wechsel: siehe `git log`. GitHub-Account auf dem PC: `Ompyl`
 
 - Server: im Ordner `python -m http.server 8765 --bind 127.0.0.1` (im Hintergrund), dann im eingebauten Browser `http://localhost:8765/`.
   `preview_start` mit Namen klappte nicht (sucht `.claude/launch.json` im falschen Ordner) → `preview_start` mit `url` benutzen.
-- Testseiten: Live `index.html`; History z. B. `history.html?loco=918061932367&days=7` (Vectron, fuhr 15.–21.11. bis Frankfurt/Ruhr/München)
-  oder `history.html?loco=918112932044` (Vectron 42082 Hodoš → Soroksári út).
-- Zum Testen sind Objekte offen: `window.holateher` (Live: `state`, `map`, `select(evn)`, `refreshLive`) und `window.holateherHistory` (`state`, `map`, `setCursor(i)`, `load(day)`).
+- Testseiten: Live `index.html`; Lok mit Zeitachse z. B. `?loco=918061932367&days=7` (Vectron, fuhr 15.–21.11. bis Frankfurt/Ruhr/München)
+  oder `?loco=918112932044` (Vectron 42082 Hodoš → Soroksári út). `history.html?…` leitet dorthin weiter.
+- Zum Testen sind Objekte offen: `window.holateher` (Live: `state`, `map`, `select(evn)`, `refreshLive`) und `holateher.tl` (Zeitachse: `state`, `open(evn, {day, range, fit})`, `close()`, `setCursor(i)`, `load(day)`, `backToLive()`); `holateher.select/unselect`.
 - Ist der Browser-Bereich in der App ausgeblendet, zeichnet die Karte nicht (requestAnimationFrame pausiert) → Emil bitten, ihn einzublenden (Strg+Umschalt+B), oder nur Logik per JS prüfen.
 - Alte Fehlermeldungen „An image named "arrow" already exists“ in der Konsole stammen aus einer früheren app.js-Fassung (verweisen auf Zeile ~610), nicht aus dem aktuellen Code.
 
@@ -50,7 +64,8 @@ Letzter Commit beim Wechsel: siehe `git log`. GitHub-Account auf dem PC: `Ompyl`
 | Datei | Inhalt |
 |---|---|
 | `index.html` + `app.js` | Live-Karte: Filter `trainType === 'T'`, blasse stehende Güterloks (in `loks.csv` oder vom Browser in 48 h als Güterzug gesehen), Infofeld mit gefahrenem Weg, Loco-Tabelle mit Excel-Export (SheetJS lazy), Knöpfe History / Datasheet ↗ / Photos ↗ |
-| `history.html` + `history.js` | History: Kalender, 1/3/7 Tage, Regler, Abspielen, Tasten (Space, `,` `.`, A/D, Q/E), Zug-Liste, Kennzahlen |
+| `timeline.js` | Zeitachse der gewählten Lok (`HTTimeline(map)`): Regler ab „jetzt“, This train/24 h/3/7/14 Tage, Kalender, Abspielen, Tasten (Space, `,` `.`, A/D, Q/E, L, Esc), Zug-Liste, Kennzahlen |
+| `history.html` | nur noch Weiterleitung alter Links auf `./?loco=…` |
 | `common.js` (`window.HT`) | Helfer, Länder/Lokart aus EVN, `buildSpeedGeo` (stufenlose Farbe, ±2 geglättet, `age`, `pi`/`pj`), `buildStopGeo`, `addTrailLayers`, `setTrailCursor`, Legende, Google/ORM, `historyUrl`, `datasheetUrl` (realtimenext), `photosUrl` (bahnbilder.de, Kurznummer) |
 | `style.css` | Styles beider Seiten |
 | `data/loks.csv` | bekannte Güterloks (statt Ungarn.xlsx): `evn, beschreibung, loktyp, bildkategorie, letzter_gueterzug, letzte_strecke, zuletzt_gueterzug, notiz` |
@@ -123,7 +138,7 @@ behandelt; Ersatz = häufigste Kategorie derselben Bauart in der Live-Liste, son
 
 ```
 index.html, app.js    Live-Karte, Infofeld, Tabelle
-history.html, history.js  History-Seite
+timeline.js           Zeitachse der gewählten Lok (history.html = Weiterleitung)
 common.js             gemeinsamer Code
 style.css             Aussehen
 data/loks.csv         bekannte Güterloks (Quelle der Wahrheit, statt Ungarn.xlsx)
