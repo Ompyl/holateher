@@ -365,6 +365,7 @@
   function showTable(on) {
     $('tableView').hidden = !on;
     $('tableBackdrop').hidden = !on;
+    document.body.classList.toggle('table-open', on);   // phone: hides the menu button over the table
     if (on) renderTable();
   }
 

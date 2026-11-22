@@ -270,6 +270,7 @@ body.tl-open .status { display: none; }
     border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
   }
   .menu[hidden] { display: none; }
+  body.table-open .menubtn, body.table-open .menu { display: none; }   /* the loco table covers the screen */
   .menu-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 18px; }
   .menu-clock { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--muted); }
   .menu-counts { color: var(--muted); margin-bottom: 6px; }
