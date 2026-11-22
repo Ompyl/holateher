@@ -543,6 +543,17 @@
     setTimeout(tickClock, 1000 - (Date.now() % 1000) + 5);
   }
 
+  // Easter egg: 7 quick clicks on the clock open a page (no hint on hover)
+  (() => {
+    let n = 0, last = 0;
+    $('clock').addEventListener('click', () => {
+      const now = Date.now();
+      n = now - last < 1500 ? n + 1 : 1;
+      last = now;
+      if (n >= 7) { n = 0; window.open('https://server.properties/', '_blank', 'noopener'); }
+    });
+  })();
+
   wireUI();
   tickClock();
   const staticReady = loadStatic();

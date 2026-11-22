@@ -110,6 +110,8 @@
   const SPEED_MAX = 120;              // from 120 km/h it is mostly a GPS jump: same colour
   const SPEED_COLOR_EXPR = ['interpolate', ['linear'], ['get', 'kmh'], ...SPEED_STOPS.flat()];
   const STOP_COLOR = '#b23cff';     // saturated purple
+  const STOP_CORE_COLOR = '#2e0a4d'; // dark centre of a stop, fades out to STOP_COLOR
+  const STOP_MERGE_M = 400, STOP_MERGE_GAP_S = 20 * 60;   // consecutive stops this close are one stop
   const GAP_SECONDS = 600;            // longer without data: dashed
   const STOP_RADIUS_M = 60, STOP_MIN_S = 120;
   const MIN_STEP_M = 20;              // smaller moves = GPS jitter while standing
@@ -170,7 +172,19 @@
         i = j + 1;
       } else i++;
     }
-    return { type: 'FeatureCollection', features: feats };
+    // one stop split in two (loco moved a few metres): merge consecutive stops close in place and time
+    const merged = [];
+    for (const f of feats) {
+      const p = merged[merged.length - 1];
+      if (p && distM(p.geometry.coordinates, f.geometry.coordinates) < STOP_MERGE_M && times[f.properties.i0] - times[p.properties.i1] <= STOP_MERGE_GAP_S) {
+        const a = p.properties, b = f.properties, w = a.min / (a.min + b.min);
+        const c = p.geometry.coordinates.map((x, k) => x * w + f.geometry.coordinates[k] * (1 - w));
+        const dur = times[b.i1] - times[a.i0];
+        merged[merged.length - 1] = { type: 'Feature', geometry: { type: 'Point', coordinates: c },
+          properties: { min: dur / 60, short: durText(dur), long: hhmm(times[a.i0]) + '–' + hhmm(times[b.i1]) + ' (' + durText(dur) + ')', i0: a.i0, i1: b.i1 } };
+      } else merged.push(f);
+    }
+    return { type: 'FeatureCollection', features: merged };
   }
 
   // ------------------------------------------------------------------
@@ -203,7 +217,10 @@
   // Opacity: live = older parts fade (age); history = parts after the slider fade (setTrailCursor).
   function addTrailLayers(map, beforeId) {
     if (!map.hasImage('arrow')) map.addImage('arrow', makeArrowIcon(), { pixelRatio: 2 });
-    for (const id of ['trail-day', 'trail-speed', 'trail-stops']) map.addSource(id, { type: 'geojson', data: EMPTY });
+    for (const id of ['trail-day', 'trail-speed']) map.addSource(id, { type: 'geojson', data: EMPTY });
+    // stops close together on screen are merged (durations added); from zoom 15 always single stops
+    map.addSource('trail-stops', { type: 'geojson', data: EMPTY, cluster: true, clusterRadius: 26, clusterMaxZoom: 14,
+      clusterProperties: { min: ['+', ['get', 'min']] } });
     const lineLayout = { 'line-join': 'round', 'line-cap': 'round' };
     const OFFSET = 2;                                        // right of travel direction: out and back side by side
     const ageOpacity = (min, max) => ['interpolate', ['linear'], ['get', 'age'], 0, min, 1, max];
@@ -226,14 +243,28 @@
         'icon-size': zoomWidth(0.6, 1), 'icon-allow-overlap': true, 'icon-rotation-alignment': 'map' },
       paint: { 'icon-opacity': ageOpacity(0.3, 0.85) } });
     // stop: purple disc without outline (size = duration) and a white centre
-    add({ id: 'trail-stops', type: 'circle', source: 'trail-stops',
-      paint: { 'circle-color': STOP_COLOR, 'circle-opacity': 0.55,
-        'circle-radius': ['interpolate', ['linear'], ['get', 'min'], 2, 6, 30, 10, 180, 16] } });
-    add({ id: 'trail-stop-core', type: 'circle', source: 'trail-stops',
-      paint: { 'circle-color': '#ffffff', 'circle-radius': 2.6, 'circle-stroke-color': STOP_COLOR, 'circle-stroke-width': 1.2 } });
+    // stop: purple disc (size = duration) with a dark centre that fades out towards the edge; hidden when zoomed far out
+    const STOP_MINZOOM = 8;
+    const stopRadius = ['interpolate', ['linear'], ['get', 'min'], 2, 6, 30, 10, 180, 16, 720, 20];
+    add({ id: 'trail-stops', type: 'circle', source: 'trail-stops', minzoom: STOP_MINZOOM,
+      paint: { 'circle-color': STOP_COLOR, 'circle-opacity': 0.6, 'circle-radius': stopRadius } });
+    add({ id: 'trail-stop-core', type: 'circle', source: 'trail-stops', minzoom: STOP_MINZOOM,
+      paint: { 'circle-color': STOP_CORE_COLOR, 'circle-opacity': 0.9, 'circle-radius': stopRadius, 'circle-blur': 1 } });
+    // duration as text ("12 min", "1 h 05"); merged stops: total time and how many
+    const durExpr = ['let', 'm', ['round', ['get', 'min']],
+      ['case', ['<', ['var', 'm'], 60], ['concat', ['to-string', ['var', 'm']], ' min'],
+        ['let', 'r', ['%', ['var', 'm'], 60],
+          ['concat', ['to-string', ['floor', ['/', ['var', 'm'], 60]]], ' h ',
+            ['case', ['<', ['var', 'r'], 10], ['concat', '0', ['to-string', ['var', 'r']]], ['to-string', ['var', 'r']]]]]]];
+    // merged stops: whole hours from 60 min ("≈ 4 h")
+    const clusterDur = ['case', ['<', ['get', 'min'], 60], durExpr, ['concat', '≈ ', ['to-string', ['round', ['/', ['get', 'min'], 60]]], ' h']];
+    const clusterText = ['concat', clusterDur, ' · ', ['to-string', ['get', 'point_count']], ' stops'];
     add({ id: 'trail-stop-label', type: 'symbol', source: 'trail-stops', minzoom: 10,
-      layout: { 'text-field': ['step', ['zoom'], ['get', 'short'], 13, ['get', 'long']], 'text-font': ['Noto Sans Regular'],
-        'text-size': 11, 'text-offset': [0, 1.2], 'text-anchor': 'top' },
+      layout: { 'text-field': ['step', ['zoom'],                       // zoom step must be the outermost expression
+          ['case', ['has', 'point_count'], clusterText, ['get', 'short']], 13,
+          ['case', ['has', 'point_count'], clusterText, ['get', 'long']]], 'text-font': ['Noto Sans Regular'],
+        'text-size': 11, 'text-offset': [0, 1.2], 'text-anchor': 'top',
+        'symbol-sort-key': ['-', 0, ['get', 'min']] },          // labels overlap: the longer stop wins
       paint: { 'text-color': '#f6ecff', 'text-halo-color': 'rgba(13,20,24,0.9)', 'text-halo-width': 1.6 } });
   }
 
