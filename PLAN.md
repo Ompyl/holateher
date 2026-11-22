@@ -56,6 +56,8 @@ behandelt; Ersatz = häufigste Kategorie derselben Bauart in der Live-Liste, son
 
 **Stand 22.11. ~15:00:** Strecken flach + durchscheinend (kein Schein), History gleich kräftig wie live (gefahren 0.75, Rest 0.35). History: `,` / `.` = eine Position zurück/vor (pausiert). Knöpfe „Datasheet ↗“ (realtimenext, neuer Tab) und **„Photos ↗“ = bahnbilder.de** (Suche nach der Kurznummer wie an der Lok, `evn[5:8] evn[8:11]`, z.B. „193 837“; volle EVN steht selten in Bildunterschriften; kann auch andere Fahrzeuge mit gleicher Kurznummer finden). Geprüfte Alternativen: railgallery.ru (502 Fehler), trainsdepot.org (nur Baureihen), trainspo.com (Suche über Adresse findet die Nummer nicht). Icons für Google/ORM, `favicon.svg`, Loco-Tabelle als Fenster mit Hintergrund (Klick daneben schließt).
 
+**Stand 22.11. ~15:20 (veröffentlicht auf ompyl.github.io/holateher, Repo Ompyl/holateher):** History: eigener Kalender (Monatsraster, Tage mit Daten markiert, andere gesperrt, „latest day“), Tage mit **A / D** (Pfeiltasten verschieben die Karte), Tempo mit **Q / E**, Zeitraum **1 / 3 / 7 Tage** (gewählter Tag + Tage davor als eine Zeitleiste, URL `&days=`, bei mehreren Tagen nur Halte ≥ 10 min), Datum über der Uhrzeit und in der Zug-Liste. Logo größer, Lok-Titel zweizeilig, Nummer wird nie abgeschnitten (schmale Fenster: „1d/3d/7d“). Beispiel: 918061932367 fuhr 15.–21.11. bis Frankfurt/Ruhrgebiet/München – die Positionen gehen also auch im Ausland weiter.
+
 ## Stufe 2 (später)
 
 - GitHub Action alle 15 min: Live-Liste abfragen, neue Güterloks in `loks.csv` eintragen,

@@ -14,14 +14,28 @@
     <div class="brand">
       <a class="logo" href="./" title="Back to the live map">holateher</a>
     </div>
-    <div class="hist-title"><strong id="locoTitle">History</strong><span id="locoSub"></span></div>
+    <div class="hist-title">
+      <strong id="locoTitle">History</strong>
+      <span id="locoSub"></span>
+    </div>
     <div class="tools">
       <div class="daynav">
-        <button id="prevDay" type="button" title="Previous day with data (←)">‹</button>
-        <input id="dayInput" type="date">
-        <button id="nextDay" type="button" title="Next day with data (→)">›</button>
+        <button id="prevDay" type="button" title="Previous day with data (A)">‹</button>
+        <div class="calwrap">
+          <button id="dayBtn" class="daybtn" type="button" title="Choose a day">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></g></svg>
+            <span id="dayLabel">–</span>
+          </button>
+          <div id="cal" class="cal" hidden></div>
+        </div>
+        <button id="nextDay" type="button" title="Next day with data (D)">›</button>
       </div>
-      <button id="btnFit" type="button" title="Zoom to the whole day">Fit day</button>
+      <div class="seg" id="rangeSeg" title="How many days to show (ending with the chosen day)">
+        <button type="button" data-n="1"><span class="long">1 day</span><span class="short">1d</span></button>
+        <button type="button" data-n="3"><span class="long">3 days</span><span class="short">3d</span></button>
+        <button type="button" data-n="7"><span class="long">7 days</span><span class="short">7d</span></button>
+      </div>
+      <button id="btnFit" type="button" title="Zoom to the whole route">Fit</button>
       <a id="btnSheet" class="btn" target="_blank" rel="noopener" title="Vehicle page on realtimenext.hu (new tab)">Datasheet ↗</a>
       <a id="btnPhotos" class="btn" target="_blank" rel="noopener" title="Photos on bahnbilder.de (new tab)">Photos ↗</a>
       <button id="btnGoogle" class="iconbtn" type="button" title="Open the current view in Google Maps" aria-label="Open in Google Maps">
@@ -41,15 +55,16 @@
 
   <section class="dock">
     <div class="row">
-      <button id="btnPlay" class="play" type="button" title="Play / pause (space) · one position back / forward: , and .">▶</button>
+      <button id="btnPlay" class="play" type="button" title="Play / pause (Space) · one position back / forward: , and .">▶</button>
       <div id="time" class="time">--:--:--</div>
       <input id="slider" type="range" min="0" max="0" value="0" step="1">
-      <label class="speed" title="Playback speed: positions per second (double-click = 8x)">
+      <label class="speed" title="Playback speed in positions per second (Q slower, E faster, double-click = 8x)">
         speed <input id="speed" type="range" min="0" max="1000" step="1"> <b id="speedVal">8x</b>
       </label>
     </div>
     <div class="info" id="info"></div>
     <div class="trains" id="trains"></div>
+    <div class="keys">Keys: <kbd>Space</kbd> play/pause · <kbd>,</kbd> <kbd>.</kbd> step · <kbd>A</kbd> <kbd>D</kbd> day · <kbd>Q</kbd> <kbd>E</kbd> speed · arrow keys move the map</div>
   </section>
 
   <footer class="credits">
