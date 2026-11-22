@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>holateher – freight trains live</title>
+  <meta name="description" content="Live map of freight trains in Hungary (data: realtimenext.hu)">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="bar">
+    <div class="brand">
+      <a class="logo" href="./">holateher</a>
+      <span class="sub">Freight trains in Hungary, live</span>
+    </div>
+    <div id="counts" class="counts">loading …</div>
+    <div class="tools">
+      <label class="toggle" title="Show known freight locos that currently have no train (faint)">
+        <input type="checkbox" id="showIdle"> idle freight locos
+      </label>
+      <button id="btnTable" type="button" title="Table of known freight locos">Locos</button>
+      <button id="btnGoogle" class="iconbtn" type="button" title="Open the current view in Google Maps" aria-label="Open in Google Maps">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"/></svg>
+      </button>
+      <button id="btnOrm" class="iconbtn" type="button" title="Open the current view in OpenRailwayMap" aria-label="Open in OpenRailwayMap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8.5 2 6 22M15.5 2 18 22"/><path d="M6.6 5.5h10.8M6.1 10h11.8M5.6 14.5h12.8M5.1 19h13.8" stroke-width="1.6"/></g></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="map"></div>
+  <div id="status" class="status"></div>
+
+  <!-- info panel of the selected train -->
+  <aside id="panel" class="panel" hidden>
+    <button class="close" id="panelClose" type="button" aria-label="Close">×</button>
+    <div id="panelBody"></div>
+  </aside>
+
+  <!-- table of known freight locos (window in the middle, map stays visible around it) -->
+  <div id="tableBackdrop" class="backdrop" hidden></div>
+  <section id="tableView" class="tableview" hidden>
+    <div class="tablehead">
+      <h2>Known freight locos</h2>
+      <input id="tableFilter" type="search" placeholder="Filter (number, type, route …)">
+      <button id="btnExport" type="button">Export to Excel</button>
+      <button id="tableClose" type="button" class="close" aria-label="Close">×</button>
+    </div>
+    <div class="tablewrap">
+      <table id="lokTable">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="hint">Source: <code>data/loks.csv</code> in the repository, plus freight locos this browser has seen in the last 48 h (marked “new”).</p>
+  </section>
+
+  <footer class="credits">
+    Data: <a href="https://realtimenext.hu" target="_blank" rel="noopener">realtimenext.hu</a> ·
+    Map: <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>
+    © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>
+  </footer>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="common.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

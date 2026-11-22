@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1b262b"/>
+  <!-- rail -->
+  <rect x="6" y="49" width="52" height="3" rx="1.5" fill="#1f8a8a"/>
+  <!-- loco body -->
+  <path d="M12 22h30l10 9v12H12z" fill="#ffd27f"/>
+  <rect x="16" y="26" width="9" height="7" rx="1.5" fill="#1b262b"/>
+  <rect x="29" y="26" width="9" height="7" rx="1.5" fill="#1b262b"/>
+  <path d="M43 26h3l5 5h-8z" fill="#1b262b"/>
+  <rect x="12" y="38" width="40" height="2.5" fill="#e0a93a"/>
+  <!-- wheels -->
+  <circle cx="20" cy="46" r="4" fill="#e6eef0"/>
+  <circle cx="32" cy="46" r="4" fill="#e6eef0"/>
+  <circle cx="44" cy="46" r="4" fill="#e6eef0"/>
+</svg>
