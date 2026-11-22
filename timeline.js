@@ -239,6 +239,9 @@
       setTrail(map, dayLine, speed, stops);
       state.speedAt = new Array(pts.length).fill(0);
       for (const f of speed.features) for (let i = f.properties.pi; i < f.properties.pj; i++) state.speedAt[i] = f.properties.kmh;
+      // the last point ("now") ends the last piece instead of starting one: give it that piece's speed
+      const lastPiece = speed.features[speed.features.length - 1];
+      if (lastPiece && lastPiece.properties.pj === pts.length - 1 && !lastPiece.properties.gap) state.speedAt[pts.length - 1] = lastPiece.properties.kmh;
       state.trains = buildTrains(pts);
       computeStats(speed, stops);
       renderTrains();
