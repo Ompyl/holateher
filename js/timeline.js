@@ -1,16 +1,16 @@
 // holateher – timeline of the selected loco (dock at the bottom): loads the window, route, slider, playback, LIVE.
 // Window: ends "now" (today) or at the end of an earlier day; range 0 = this train, 1 = 24 h, 3 / 7 / 14 days.
 // Events: emit('tl-live', bool) when the LIVE state changes, emit('tl-url', evn, day|null, range), emit('close-request').
-import { LS, TODAY_REFRESH_MS, TRACK } from './config.js?v=20261122f';
-import { $, esc, lsGet, lsSet, emit, ymd, today, parseYmd, addDays, daysBetween, dayName, dayLong, shortDate, hhmm, hhmmss } from './util.js?v=20261122f';
-import { isEvn } from './evn.js?v=20261122f';
-import { fetchDay, fetchHistoryDays } from './api.js?v=20261122f';
-import { buildSpeedGeo, buildStopGeo, buildTrains, trainStart, speedPerPoint, figures, EMPTY } from './track.js?v=20261122f';
-import { setTrail, setTrailCursor, setMarker, setMarkerImage } from './trail.js?v=20261122f';
-import { fitCoords } from './map.js?v=20261122f';
-import { state as app } from './state.js?v=20261122f';
-import { isActive } from './live.js?v=20261122f';
-import { createCalendar } from './calendar.js?v=20261122f';
+import { LS, TODAY_REFRESH_MS, TRACK } from './config.js?v=20261122g';
+import { $, esc, lsGet, lsSet, emit, ymd, today, parseYmd, addDays, daysBetween, dayName, dayLong, shortDate, hhmm, hhmmss } from './util.js?v=20261122g';
+import { isEvn } from './evn.js?v=20261122g';
+import { fetchDay, fetchHistoryDays } from './api.js?v=20261122g';
+import { buildSpeedGeo, buildStopGeo, buildTrains, trainStart, speedPerPoint, figures, EMPTY } from './track.js?v=20261122g';
+import { setTrail, setTrailCursor, setMarker, setMarkerImage } from './trail.js?v=20261122g';
+import { fitCoords } from './map.js?v=20261122g';
+import { state as app } from './state.js?v=20261122g';
+import { isActive } from './live.js?v=20261122g';
+import { createCalendar } from './calendar.js?v=20261122g';
 
 const RANGES = [0, 1, 3, 7, 14];
 const SPEED_MIN = 1, SPEED_MAX = 100, SPEED_DEFAULT = 8, STEPS = 1000, SPEED_KEY_STEP = 60;

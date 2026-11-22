@@ -1,6 +1,6 @@
 // holateher – every request to realtimenext goes through here (one place to keep the traffic small).
-import { URLS, LS, ICONS_CACHE_MS, PAST_DAYS_CACHE } from './config.js?v=20261122f';
-import { lsGet, lsSet, today } from './util.js?v=20261122f';
+import { URLS, LS, ICONS_CACHE_MS, PAST_DAYS_CACHE } from './config.js?v=20261122g';
+import { lsGet, lsSet, today } from './util.js?v=20261122g';
 
 export const stats = { requests: 0, bytes: 0 };   // for testing: window.holateher.api.stats
 

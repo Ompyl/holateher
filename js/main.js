@@ -1,15 +1,15 @@
 // holateher – start: load static data, create the map and wire the modules. See PLAN.md.
-import { $, on, parseCSV } from './util.js?v=20261122f';
-import { isEvn } from './evn.js?v=20261122f';
-import { fetchIcons, stats } from './api.js?v=20261122f';
-import { state } from './state.js?v=20261122f';
-import { createMap, addVehicleLayers, drawVehicles } from './map.js?v=20261122f';
-import { addTrailLayers } from './trail.js?v=20261122f';
-import { startLive, refresh } from './live.js?v=20261122f';
-import { initMenu, menuOpen, showMenu } from './menu.js?v=20261122f';
-import { initSelection, select, unselect } from './selection.js?v=20261122f';
-import { initTimeline, tl, load, setCursor, backToLive, fitRoute } from './timeline.js?v=20261122f';
-import { initTable, showTable, tableOpen } from './table.js?v=20261122f';
+import { $, on, parseCSV } from './util.js?v=20261122g';
+import { isEvn } from './evn.js?v=20261122g';
+import { fetchIcons, stats } from './api.js?v=20261122g';
+import { state } from './state.js?v=20261122g';
+import { createMap, addVehicleLayers, drawVehicles } from './map.js?v=20261122g';
+import { addTrailLayers } from './trail.js?v=20261122g';
+import { startLive, refresh } from './live.js?v=20261122g';
+import { initMenu, menuOpen, showMenu } from './menu.js?v=20261122g';
+import { initSelection, select, unselect } from './selection.js?v=20261122g';
+import { initTimeline, tl, load, setCursor, backToLive, fitRoute } from './timeline.js?v=20261122g';
+import { initTable, showTable, tableOpen } from './table.js?v=20261122g';
 
 const text = url => fetch(url, { cache: 'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => '');
 

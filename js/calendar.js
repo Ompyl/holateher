@@ -1,5 +1,5 @@
 // holateher – calendar popover of the timeline (days with data are marked, opens upwards).
-import { $, pad, MON, parseYmd, addDays, daysBetween, dayLong, today } from './util.js?v=20261122f';
+import { $, pad, MON, parseYmd, addDays, daysBetween, dayLong, today } from './util.js?v=20261122g';
 
 // ctx: { day(): selected day, range(): days in the window, days: Set of days with data, navDays(): allowed days, pick(day) }
 export function createCalendar(ctx) {
