@@ -46,7 +46,8 @@ Letzter Commit beim Wechsel: siehe `git log`. GitHub-Account auf dem PC: `Ompyl`
 
 - Emil schreibt Deutsch (locker, Tippfehler normal) → auf Deutsch antworten. **Die Webseite selbst ist komplett Englisch.**
 - **Änderungen lokal lassen, nicht nach jeder Aufgabe committen/pushen.** Emil schaut lokal (http://localhost:8765/) und sagt selbst, wann gepusht wird; nur erinnern, wenn sich länger viel Ungepushtes ansammelt. Ablauf beim Push: committen (mit Co-Authored-By-Zeile) → `git push` → Pages-Build abwarten (`gh run watch`) → echte Seite prüfen.
-- Design: modern, dunkle Oberfläche (#1b262b), Strecken flach + halbtransparent (kein Glow), Halte ohne Kontur. Links zu fremden Seiten immer im neuen Tab (↗).
+- Hintergrundkarte: OSM-Rasterkacheln (`tile.openstreetmap.org`), normale Farben, abgedunkelt wie ORM im Dark-Theme: Sättigung 50 %, Deckkraft 50 % über #1b262b (Invertieren war Emil zu viel) (`BASE_*` in `common.js`); Schriften von OpenFreeMap.
+- Design: modern, dunkle Oberfläche (#1b262b), Strecken flach in knalligen Neonfarben mit dünnem dunklem Rand (kein Glow), Halte als sattlila Scheibe ohne Außenrand mit weißem Kern, LIVE-Knopf rot mit pulsierendem Punkt. Links zu fremden Seiten immer im neuen Tab (↗).
 - Nicht unnötig viele Anfragen an realtimenext (kleine Hobby-Seite): Live-Liste nur alle 10 s und nur bei sichtbarem Tab.
 
 ### Lokal testen

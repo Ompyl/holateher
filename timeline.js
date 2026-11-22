@@ -256,7 +256,7 @@
     function updateLiveBadge() {
       const b = $('btnBackLive');
       b.classList.toggle('is-live', state.live);
-      b.textContent = state.live ? '● LIVE' : 'Back to live';
+      b.innerHTML = state.live ? '<span class="live-dot"></span>LIVE' : 'Back to live';
       b.disabled = state.live;
       b.hidden = !state.live && !online();
     }

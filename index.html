@@ -15,6 +15,7 @@
       <a class="logo" href="./">holateher</a>
     </div>
     <div id="counts" class="counts">loading …</div>
+    <div id="clock" class="clock" title="Current time"></div>
     <div class="tools">
       <label class="toggle" title="Show known freight locos that currently have no train (faint)">
         <input type="checkbox" id="showIdle"> idle freight locos
@@ -65,7 +66,7 @@
     <div class="row">
       <button id="btnPlay" class="play" type="button" title="Play / pause (Space) · from &quot;now&quot; it starts at the beginning · one position back / forward: , and .">▶</button>
       <div id="time" class="time">--:--</div>
-      <button id="btnBackLive" class="livebtn" type="button" title="Back to the live position (L)">● LIVE</button>
+      <button id="btnBackLive" class="livebtn" type="button" title="Back to the live position (L)"><span class="live-dot"></span>LIVE</button>
       <input id="slider" type="range" min="0" max="0" value="0" step="1" aria-label="Time">
       <label class="speed" title="Playback speed in positions per second (Q slower, E faster, double-click = 8x)">
         speed <input id="speed" type="range" min="0" max="1000" step="1"> <b id="speedVal">8x</b>
@@ -99,8 +100,7 @@
 
   <footer class="credits">
     Data: <a href="https://realtimenext.hu" target="_blank" rel="noopener">realtimenext.hu</a> ·
-    Map: <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>
-    © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>
+    Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors
   </footer>
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>

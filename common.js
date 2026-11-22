@@ -5,7 +5,22 @@
   'use strict';
 
   const API = 'https://api.realtimenext.hu/api/';
-  const BASE_STYLE = 'https://tiles.openfreemap.org/styles/positron';
+  // Base map: normal OpenStreetMap raster tiles, darkened like OpenRailwayMap with the dark theme:
+  // saturation 50 % and opacity 50 % over the dark page colour (ORM: CSS filter saturate() opacity() on its background map).
+  // Fonts for our labels: OpenFreeMap. OSM tile usage policy: https://operations.osmfoundation.org/policies/tiles/
+  const BASE_OPACITY = 0.5, BASE_SATURATION = 0.5;      // 0..1 (like OpenRailwayMap's background sliders)
+  const BASE_STYLE = {
+    version: 8,
+    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    sources: {
+      osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19 }
+    },
+    layers: [
+      { id: 'base-bg', type: 'background', paint: { 'background-color': '#1b262b' } },
+      { id: 'osm', type: 'raster', source: 'osm',
+        paint: { 'raster-saturation': BASE_SATURATION - 1, 'raster-opacity': BASE_OPACITY } }   // MapLibre saturation: -1 = grey, 0 = unchanged
+    ]
+  };
 
   const COUNTRY = {
     '80': 'Germany', '81': 'Austria', '55': 'Hungary', '54': 'Czechia', '56': 'Slovakia',
@@ -90,10 +105,11 @@
   // ------------------------------------------------------------------
   // Route travelled: smooth speed colours, stops
   // ------------------------------------------------------------------
-  const SPEED_STOPS = [[0, '#6a3d9a'], [15, '#d7301f'], [40, '#f46d43'], [70, '#fdd835'], [100, '#66bb6a'], [120, '#1a9850']];
+  // bright colours for the darkened map
+  const SPEED_STOPS = [[0, '#c04bff'], [15, '#ff2e63'], [40, '#ff8c1a'], [70, '#ffe81a'], [100, '#7cff4f'], [120, '#00f5a0']];
   const SPEED_MAX = 120;              // from 120 km/h it is mostly a GPS jump: same colour
   const SPEED_COLOR_EXPR = ['interpolate', ['linear'], ['get', 'kmh'], ...SPEED_STOPS.flat()];
-  const STOP_COLOR = '#5b2a86';
+  const STOP_COLOR = '#b23cff';     // saturated purple
   const GAP_SECONDS = 600;            // longer without data: dashed
   const STOP_RADIUS_M = 60, STOP_MIN_S = 120;
   const MIN_STEP_M = 20;              // smaller moves = GPS jitter while standing
@@ -198,31 +214,36 @@
       paint: { 'line-color': '#7d8f96', 'line-width': zoomWidth(1.5, 3), 'line-opacity': 0.45, 'line-dasharray': [1, 2] } });
     add({ id: 'trail-gap', type: 'line', source: 'trail-speed', filter: ['get', 'gap'],
       paint: { 'line-color': '#8a9aa0', 'line-width': 2, 'line-dasharray': [1.5, 2], 'line-opacity': ageOpacity(0.3, 0.7), 'line-offset': OFFSET } });
-    // flat, semi-transparent line (no glow); older parts a bit more transparent
+    // thin dark edge under the coloured line, so it stands out on the map (flat, no glow)
+    add({ id: 'trail-casing', type: 'line', source: 'trail-speed', layout: lineLayout, filter: solid,
+      paint: { 'line-color': '#0d1418', 'line-width': zoomWidth(5.5, 9.5), 'line-opacity': ageOpacity(0.2, 0.55), 'line-offset': OFFSET } });
+    // flat line in bright speed colours; older parts a bit more transparent
     add({ id: 'trail-line', type: 'line', source: 'trail-speed', layout: lineLayout, filter: solid,
-      paint: { 'line-color': SPEED_COLOR_EXPR, 'line-width': zoomWidth(3, 6), 'line-opacity': ageOpacity(0.35, 0.75), 'line-offset': OFFSET } });
+      paint: { 'line-color': SPEED_COLOR_EXPR, 'line-width': zoomWidth(3.5, 7), 'line-opacity': ageOpacity(0.5, 1), 'line-offset': OFFSET } });
     add({ id: 'trail-arrows', type: 'symbol', source: 'trail-speed', minzoom: 8,
       filter: ['all', solid, ['>', ['get', 'kmh'], 5]],
       layout: { 'symbol-placement': 'line', 'symbol-spacing': 70, 'icon-image': 'arrow',
         'icon-size': zoomWidth(0.6, 1), 'icon-allow-overlap': true, 'icon-rotation-alignment': 'map' },
       paint: { 'icon-opacity': ageOpacity(0.3, 0.85) } });
+    // stop: purple disc without outline (size = duration) and a white centre
     add({ id: 'trail-stops', type: 'circle', source: 'trail-stops',
-      paint: { 'circle-color': STOP_COLOR, 'circle-radius': ['interpolate', ['linear'], ['get', 'min'], 2, 5, 30, 9, 180, 14],
-        'circle-opacity': 0.4 } });
+      paint: { 'circle-color': STOP_COLOR, 'circle-opacity': 0.55,
+        'circle-radius': ['interpolate', ['linear'], ['get', 'min'], 2, 6, 30, 10, 180, 16] } });
     add({ id: 'trail-stop-core', type: 'circle', source: 'trail-stops',
-      paint: { 'circle-color': STOP_COLOR, 'circle-radius': 2.5, 'circle-opacity': 0.85 } });
+      paint: { 'circle-color': '#ffffff', 'circle-radius': 2.6, 'circle-stroke-color': STOP_COLOR, 'circle-stroke-width': 1.2 } });
     add({ id: 'trail-stop-label', type: 'symbol', source: 'trail-stops', minzoom: 10,
       layout: { 'text-field': ['step', ['zoom'], ['get', 'short'], 13, ['get', 'long']], 'text-font': ['Noto Sans Regular'],
         'text-size': 11, 'text-offset': [0, 1.2], 'text-anchor': 'top' },
-      paint: { 'text-color': '#3b1f55', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 1.4 } });
+      paint: { 'text-color': '#f6ecff', 'text-halo-color': 'rgba(13,20,24,0.9)', 'text-halo-width': 1.6 } });
   }
 
   // History mode: everything after point index `cur` is drawn faint
   function setTrailCursor(map, cur) {
     const past = ['<', ['get', 'pi'], cur];
     const op = (a, b) => ['case', past, a, b];
-    // same strength as the live map: travelled part 0.75, the rest like the oldest live parts
-    map.setPaintProperty('trail-line', 'line-opacity', op(0.75, 0.35));
+    // travelled part fully visible, the part after the slider faint
+    map.setPaintProperty('trail-line', 'line-opacity', op(1, 0.3));
+    map.setPaintProperty('trail-casing', 'line-opacity', op(0.55, 0.12));
     map.setPaintProperty('trail-gap', 'line-opacity', op(0.7, 0.3));
     map.setPaintProperty('trail-arrows', 'icon-opacity', op(0.85, 0));
   }
@@ -230,7 +251,8 @@
   // Back to the live look: older parts fade (same values as in addTrailLayers)
   function resetTrailCursor(map) {
     const ageOpacity = (min, max) => ['interpolate', ['linear'], ['get', 'age'], 0, min, 1, max];
-    map.setPaintProperty('trail-line', 'line-opacity', ageOpacity(0.35, 0.75));
+    map.setPaintProperty('trail-line', 'line-opacity', ageOpacity(0.5, 1));
+    map.setPaintProperty('trail-casing', 'line-opacity', ageOpacity(0.2, 0.55));
     map.setPaintProperty('trail-gap', 'line-opacity', ageOpacity(0.3, 0.7));
     map.setPaintProperty('trail-arrows', 'icon-opacity', ageOpacity(0.3, 0.85));
   }

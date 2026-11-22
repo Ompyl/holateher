@@ -463,7 +463,14 @@
     map.on('mouseleave', 'vehicles', () => { map.getCanvas().style.cursor = ''; });
   }
 
+  // Live clock in the header (ticks on the full second)
+  function tickClock() {
+    $('clock').textContent = new Date().toLocaleTimeString('en-GB');
+    setTimeout(tickClock, 1000 - (Date.now() % 1000) + 5);
+  }
+
   wireUI();
+  tickClock();
   const staticReady = loadStatic();
   map.on('load', async () => {
     addLayers();
