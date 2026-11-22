@@ -99,7 +99,13 @@
       if (coords.length < 2) { map.jumpTo({ center: coords[0], zoom: 12 }); return; }
       const b = new maplibregl.LngLatBounds();
       for (const c of coords) b.extend(c);
-      map.fitBounds(b, { padding: { top: 70, bottom: 230, left: 50, right: 370 }, maxZoom: 13, duration: 0 });
+      // keep the route clear of the info panel (right on desktop, top on phones) and the dock
+      const phone = matchMedia('(max-width: 700px)').matches;
+      const dockH = $('dock').offsetHeight || 190, panel = $('panel');
+      const padding = phone
+        ? { top: (panel.hidden ? 60 : panel.offsetHeight + 24), bottom: dockH + 30, left: 24, right: 24 }
+        : { top: 70, bottom: dockH + 40, left: 50, right: 370 };
+      map.fitBounds(b, { padding, maxZoom: 13, duration: 0 });
     }
 
     // Marker of the loco at the slider position – added once, on top of everything
@@ -325,7 +331,7 @@
     function setSpeed(s) {
       state.speed = Math.max(SPEED_MIN, Math.min(SPEED_MAX_PLAY, s));
       $('speed').value = toSlider(state.speed);
-      $('speedVal').textContent = fmtSpeed(state.speed);
+      $('speedVal').textContent = $('speedBtn').textContent = fmtSpeed(state.speed);
       lsSet(LS.speed, state.speed);
     }
 
@@ -346,7 +352,7 @@
       const range = state.range === 0 && !endsNow() ? 1 : state.range;
       for (const b of $('rangeSeg').querySelectorAll('button')) {
         b.classList.toggle('on', +b.dataset.n === range);
-        if (+b.dataset.n === 0) b.disabled = !endsNow();
+        if (+b.dataset.n === 0) b.disabled = b.hidden = !endsNow();   // only for the train running now
       }
       if (endsNow()) $('dayLabel').textContent = range === 0 ? 'This train' : 'Last ' + rangeName(range);
       else {
@@ -420,6 +426,9 @@
       setSpeed(state.speed);
       sp.addEventListener('input', () => setSpeed(toSpeed(+sp.value)));
       sp.addEventListener('dblclick', () => setSpeed(SPEED_DEFAULT));
+      // phone: one button that steps through the playback speeds
+      const PRESETS = [1, 2, 4, 8, 16, 32, 64, 100];
+      $('speedBtn').addEventListener('click', () => setSpeed(PRESETS.find(p => p > state.speed + 0.01) || PRESETS[0]));
       $('prevDay').addEventListener('click', () => shiftDay(-1));
       $('nextDay').addEventListener('click', () => shiftDay(+1));
       $('rangeSeg').addEventListener('click', e => {

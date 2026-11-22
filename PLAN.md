@@ -42,6 +42,19 @@ Letzter Commit beim Wechsel: siehe `git log`. GitHub-Account auf dem PC: `Ompyl`
   - Adresse: `?loco=…[&date=…][&days=…]` (replaceState, teilbar); `history.html?…` leitet weiter. Esc / × schließt.
   - Infofeld zeigt weiter die Live-Daten; Zug/Tempo zum Regler-Zeitpunkt stehen in der Leiste.
 
+- **Handy-Ansicht (22.11. ~19:40, lokal; Backup davor: `..\holateher-backup-2026-11-22-1930`):** nur bis 700 px Breite
+  (`@media (max-width: 700px)` am Ende von `style.css`). Kopfzeile weg (`--bar-h: 0`), stattdessen Menüknopf oben links
+  (`#menuBtn`/`#menu`): Uhr, Zähler, idle-Schalter (mit dem Desktop-Schalter verbunden), Locos, Google Maps, ORM; schließt bei
+  Klick daneben, beim Verschieben der Karte und nach einer Aktion. Zoom-Knöpfe und „updated“ weg. Infofeld oben neben dem
+  Menüknopf, nur Titel, Strecke, eine Zeile (Typ · Verspätung · Status) und Datasheet/Photos. Leiste schlanker (ohne Tempo,
+  Tasten, Fit, km-Zusammenfassung). `fit()` in `timeline.js` hält die Strecke frei von Infofeld (oben) und Leiste.
+  Nachgebessert (~19:55): Infofeld 2 Zeilen (Titel + „Strecke · Typ · Verspätung · Status“), Info/Photos als Icons neben ×;
+  Leiste ohne Zugliste, Tempo vor Zugnummer, Tempo-Knopf `#speedBtn` (1x→2x→…→100x) rechts neben der Tagesauswahl.
+  Überall: „Datasheet“ heißt jetzt „Vehicle info ↗“; „This train“ ist an früheren Tagen ausgeblendet.
+  Zurück-Taste (Handy/Browser) schließt die Auswahl: `select` legt einen Verlaufseintrag `{sel: true}` an, `unselect` geht zurück, `popstate` schließt.
+  Am Handy testen: `python -m http.server 8766 --bind 0.0.0.0 --directory "C:\Users\Emil\Documents\HOP\holateher"` →
+  `http://192.168.178.101:8766/` (WLAN) bzw. Tailscale `http://100.72.203.93:8766/`.
+
 ### Arbeitsweise / Wünsche von Emil
 
 - Emil schreibt Deutsch (locker, Tippfehler normal) → auf Deutsch antworten. **Die Webseite selbst ist komplett Englisch.**

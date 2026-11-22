@@ -30,6 +30,19 @@
     </div>
   </header>
 
+  <!-- phone: menu button + fold-out menu instead of the header bar -->
+  <button id="menuBtn" class="menubtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+  </button>
+  <nav id="menu" class="menu" hidden>
+    <div class="menu-head"><strong>holateher</strong><span id="mClock" class="menu-clock"></span></div>
+    <div id="mCounts" class="menu-counts">loading …</div>
+    <label class="menu-item toggle"><input type="checkbox" id="mShowIdle"> Idle freight locos</label>
+    <button type="button" class="menu-item" data-menu="table">Locos (table)</button>
+    <button type="button" class="menu-item" data-menu="google">Open in Google Maps ↗</button>
+    <button type="button" class="menu-item" data-menu="orm">Open in OpenRailwayMap ↗</button>
+  </nav>
+
   <div id="map"></div>
   <div id="status" class="status"></div>
 
@@ -93,6 +106,7 @@
       </div>
       <button id="btnFit" type="button" title="Zoom to the whole route">Fit</button>
       <div class="info" id="info"></div>
+      <button id="speedBtn" class="speedbtn" type="button" title="Playback speed (tap to change)" aria-label="Playback speed">8x</button>
     </div>
     <div class="trains" id="trains"></div>
     <div class="keys">Keys: <kbd>Space</kbd> play/pause · <kbd>,</kbd> <kbd>.</kbd> step · <kbd>A</kbd> <kbd>D</kbd> day · <kbd>Q</kbd> <kbd>E</kbd> speed · <kbd>L</kbd> live · <kbd>Esc</kbd> close</div>

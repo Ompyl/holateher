@@ -169,6 +169,7 @@
     await loadImagesFor(fc.features);
     map.getSource('vehicles')?.setData(fc);
     $('counts').textContent = nFreight + ' live freight' + (nFreight === 1 ? '' : 's') + (state.showIdle ? ' · ' + nIdle + ' idle' : '');
+    $('mCounts').textContent = $('counts').textContent;
   }
 
   function setStatus(text, error) {
@@ -198,7 +199,7 @@
   // Address of the current view: ?loco=… while a loco is selected (can be shared)
   function setUrl(evn, day, range) {
     const url = evn ? historyUrl(evn, day, range) : location.pathname;
-    if (location.search !== (evn ? url : '')) history.replaceState(null, '', url);
+    if (location.search !== (evn ? url : '')) history.replaceState(history.state, '', url);   // keep the {sel} marker
   }
 
   // ------------------------------------------------------------------
@@ -206,6 +207,8 @@
   // ------------------------------------------------------------------
   // opts: day / range for the timeline, fit = zoom to the route (from the table or a link)
   function select(evn, o = {}) {
+    // one browser-history step per selection: the back button (phone) closes it again
+    if (!history.state?.sel) history.pushState({ sel: true }, '', location.href);
     state.selected = evn;
     state.panelHtml = null;
     $('panel').hidden = false;
@@ -213,7 +216,9 @@
     drawVehicles();
     tl.open(evn, { day: o.day, range: o.range, fit: o.fit, icon: state.imgByEvn.get(evn) });
   }
-  function unselect() {
+  // fromPopstate: the browser already went back; otherwise go back ourselves, popstate then closes the selection
+  function unselect(fromPopstate = false) {
+    if (!fromPopstate && history.state?.sel) { history.back(); return; }
     state.selected = null;
     state.panelHtml = null;
     $('panel').hidden = true;
@@ -242,6 +247,7 @@
     const html = `
       <h3>${title}</h3>
       <div class="rel">${esc(rel)}</div>
+      <div class="mini">${esc([rel && rel !== String(v?.trainNumber || '') ? rel : '', v?.vehicleModel || k?.loktyp, delay !== '–' ? delay : '', v ? (v.moving ? 'moving' : 'stopped') : 'no live data'].filter(Boolean).join(' · '))}</div>
       <dl>
         <dt>Loco</dt><dd>${esc(fmtEvn(evn))}</dd>
         <dt>Type</dt><dd>${esc(v?.vehicleModel || k?.loktyp || '–')}</dd>
@@ -252,8 +258,8 @@
         ${k?.beschreibung ? `<dt>Note</dt><dd>${esc(k.beschreibung)}${k.notiz ? ' · ' + esc(k.notiz) : ''}</dd>` : ''}
       </dl>
       <div class="actions">
-        <a class="btn" href="${datasheetUrl(evn)}" target="_blank" rel="noopener" title="Vehicle page on realtimenext.hu (new tab)">Datasheet ↗</a>
-        <a class="btn" href="${photosUrl(evn)}" target="_blank" rel="noopener" title="Photos of “${esc(shortNo(evn))}” on bahnbilder.de (new tab)">Photos ↗</a>
+        <a class="btn" href="${datasheetUrl(evn)}" target="_blank" rel="noopener" title="Vehicle page on realtimenext.hu (new tab)" aria-label="Vehicle info"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></g></svg><span class="long">Vehicle info ↗</span></a>
+        <a class="btn" href="${photosUrl(evn)}" target="_blank" rel="noopener" title="Photos of “${esc(shortNo(evn))}” on bahnbilder.de (new tab)" aria-label="Photos"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v13H4z"/><circle cx="12" cy="13" r="3.5"/></g></svg><span class="long">Photos ↗</span></a>
       </div>
       ${legendHTML(true)}`;
     // only rebuild when something changed (otherwise a click during an update could get lost)
@@ -377,8 +383,29 @@
   // UI wiring
   // ------------------------------------------------------------------
   function wireUI() {
-    $('showIdle').checked = state.showIdle;
-    $('showIdle').addEventListener('change', e => { state.showIdle = e.target.checked; lsSet(LS.idle, state.showIdle); drawVehicles(); });
+    const setIdle = on => {
+      state.showIdle = on; lsSet(LS.idle, on);
+      $('showIdle').checked = on; $('mShowIdle').checked = on;
+      drawVehicles();
+    };
+    $('showIdle').checked = $('mShowIdle').checked = state.showIdle;
+    $('showIdle').addEventListener('change', e => setIdle(e.target.checked));
+    $('mShowIdle').addEventListener('change', e => setIdle(e.target.checked));
+    // phone menu: opens with the button, closes on any click outside (or after choosing an action)
+    const menu = $('menu'), menuBtn = $('menuBtn');
+    const showMenu = on => { menu.hidden = !on; menuBtn.setAttribute('aria-expanded', String(on)); };
+    menuBtn.addEventListener('click', e => { e.stopPropagation(); showMenu(menu.hidden); });
+    menu.addEventListener('click', e => {
+      e.stopPropagation();
+      const b = e.target.closest('button[data-menu]');
+      if (!b) return;
+      showMenu(false);
+      if (b.dataset.menu === 'table') showTable(true);
+      else if (b.dataset.menu === 'google') openGoogle(map);
+      else if (b.dataset.menu === 'orm') openOrm(map);
+    });
+    document.addEventListener('click', () => showMenu(false));
+    map.on('movestart', () => showMenu(false));
     $('btnGoogle').addEventListener('click', () => openGoogle(map));
     $('btnOrm').addEventListener('click', () => openOrm(map));
     $('btnTable').addEventListener('click', () => showTable(true));
@@ -400,7 +427,8 @@
       const b = e.target.closest('button[data-show]');
       if (b) showOnMap(b.dataset.show);
     });
-    $('panelClose').addEventListener('click', unselect);
+    $('panelClose').addEventListener('click', () => unselect());
+    window.addEventListener('popstate', () => { if (state.selected && !history.state?.sel) unselect(true); });
     // History icon in the table: select the loco and open its timeline (middle click = new tab with ?loco=…)
     document.addEventListener('click', e => {
       const a = e.target.closest('a[data-hist]');
@@ -411,7 +439,8 @@
     });
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
-      if (!$('tableView').hidden) showTable(false);
+      if (!$('menu').hidden) $('menu').hidden = true;
+      else if (!$('tableView').hidden) showTable(false);
       else if (state.selected) unselect();
     });
   }
@@ -465,7 +494,7 @@
 
   // Live clock in the header (ticks on the full second)
   function tickClock() {
-    $('clock').textContent = new Date().toLocaleTimeString('en-GB');
+    $('clock').textContent = $('mClock').textContent = new Date().toLocaleTimeString('en-GB');
     setTimeout(tickClock, 1000 - (Date.now() % 1000) + 5);
   }
 

@@ -232,3 +232,75 @@ body.tl-open .status { display: none; }
   background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; color: var(--muted);
 }
 .msg[hidden] { display: none; }
+
+/* ---------- Phone menu (only shown on small screens) ---------- */
+.menubtn, .menu, .panel .mini, .speedbtn, .panel .actions .ico { display: none; }
+.panel .actions .ico { width: 16px; height: 16px; }
+.speedbtn { flex: none; font-size: 12px; padding: 3px 9px; font-variant-numeric: tabular-nums; }
+.menubtn svg { width: 22px; height: 22px; }
+
+/* ---------- Phones: map uses the whole screen, compact panel and dock ---------- */
+@media (max-width: 700px) {
+  :root { --bar-h: 0px; }
+  #bar, .status, .maplibregl-ctrl-bottom-right { display: none !important; }
+
+  .menubtn {
+    display: flex; align-items: center; justify-content: center; position: fixed; top: 10px; left: 10px; z-index: 12;
+    width: 42px; height: 42px; padding: 0; border-radius: 12px; background: var(--bg); box-shadow: 0 2px 10px rgba(0, 0, 0, .4);
+  }
+  .menu {
+    display: flex; flex-direction: column; gap: 4px; position: fixed; top: 60px; left: 10px; z-index: 12;
+    width: min(280px, calc(100% - 20px)); padding: 12px; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  }
+  .menu[hidden] { display: none; }
+  .menu-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 18px; }
+  .menu-clock { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .menu-counts { color: var(--muted); margin-bottom: 6px; }
+  .menu-item { text-align: left; padding: 10px 12px; font-size: 15px; }
+  .menu .toggle { color: var(--fg); background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; }
+  .menu .toggle input { width: 18px; height: 18px; }
+
+  /* info panel: small, at the top next to the menu button, only the important lines */
+  .panel { top: 10px; left: 62px; right: 10px; width: auto; padding: 8px 10px 8px 12px; max-height: 40%; }
+  .panel h3 { font-size: 16px; line-height: 26px; margin: 0 104px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .panel .rel, .panel dl, .panel .gradient, .panel .ticks, .panel .legend2 { display: none; }
+  .panel .mini { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .panel .actions { position: absolute; top: 8px; right: 38px; margin: 0; gap: 6px; flex-wrap: nowrap; }
+  .panel .actions .btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 26px; padding: 0; }
+  .panel .actions .long { display: none; }
+  .panel .actions .ico { display: block; }
+  .panel .close { top: 6px; right: 6px; }
+  body.tl-open .panel { max-height: calc(100% - var(--dock-h, 190px) - 50px); }
+
+  /* timeline dock: slimmer */
+  .dock { left: 6px; right: 6px; bottom: 20px; padding: 8px 10px; border-radius: 12px; }
+  .dock .row { gap: 8px; }
+  .dock .play { width: 34px; height: 32px; }
+  .dock .time { font-size: 15px; min-width: 0; }
+  .dock .speed, .dock .keys, #btnFit { display: none; }
+  .dock .row2 { margin-top: 6px; gap: 6px; }
+  .daynav > button { width: 28px; }
+  .daybtn { min-width: 0; padding: 4px 8px; font-size: 12px; }
+  .daybtn svg { display: none; }
+  .seg button { padding: 4px 7px; font-size: 12px; }
+  .dock .row2 .info { margin-left: 0; flex: 1 1 auto; min-width: 0; font-size: 12px; gap: 4px 12px; }
+  .dock .info span:nth-child(2) { order: -1; }       /* speed first, then the train */
+  .dock .info span:nth-child(3) { display: none; }   /* km / stops summary: not needed on the phone */
+  .speedbtn { display: block; }
+  /* row 2 on the phone: [day nav ........ speed]  then  [range] [speed · train] */
+  .dock .row2 .daynav { order: 1; }
+  .dock .row2 .speedbtn { order: 2; margin-left: auto; }
+  .dock .row2 .seg { order: 3; }
+  .dock .row2 .info { order: 4; }
+  .dock .trains { display: none; }
+  .chip { font-size: 11px; }
+  .dock .cal { left: 0; transform: none; }
+
+  /* loco table window and footer */
+  .backdrop { inset: 0; }
+  .tableview { top: 10px; bottom: 26px; width: calc(100% - 16px); padding: 10px 12px; }
+  .tablehead { flex-wrap: wrap; gap: 8px; }
+  .tablehead input[type="search"] { flex: 1 1 100%; order: 3; }
+  .credits { font-size: 10px; padding: 1px 6px; }
+}
