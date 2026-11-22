@@ -1,12 +1,12 @@
 // holateher – live list polling: every 10 s, only while the tab is visible and someone is using the page.
 // After 10 min without mouse / touch / key the polling pauses; the next interaction resumes it at once.
-import { POLL_MS, INACTIVE_MS, SEEN_KEEP_MS, LS } from './config.js?v=20261122g';
-import { $, lsSet, emit, clockText } from './util.js?v=20261122g';
-import { isEvn } from './evn.js?v=20261122g';
-import { fetchLive } from './api.js?v=20261122g';
-import { state } from './state.js?v=20261122g';
+import { POLL_MS, INACTIVE_MS, SEEN_KEEP_MS, LS } from './config.js?v=20261122i';
+import { $, lsSet, emit, clockText } from './util.js?v=20261122i';
+import { isEvn } from './evn.js?v=20261122i';
+import { fetchLive } from './api.js?v=20261122i';
+import { state } from './state.js?v=20261122i';
 
-let timer = null, lastActivity = Date.now(), pausedInactive = false, busy = false;
+let timer = null, lastActivity = Date.now(), pausedInactive = false, busy = false, lastOk = 0, lastError = '';
 
 export const isActive = () => document.visibilityState === 'visible' && !pausedInactive;
 
@@ -35,10 +35,12 @@ export async function refresh() {
     state.live = list;
     state.byEvn = new Map(list.filter(v => v.is_rail_uic).map(v => [v.rail_uic, v]));
     rememberFreight(list);
+    lastOk = Date.now(); lastError = '';
     setStatus('updated ' + clockText());
     emit('live');
   } catch (e) {
     console.error(e);
+    lastError = e.message;
     setStatus('Could not load live data – retrying shortly', 'error');
   } finally { busy = false; }
 }
@@ -65,6 +67,12 @@ function activity() {
   lastActivity = Date.now();
   if (pausedInactive && document.visibilityState === 'visible') start();
 }
+
+// For the debug view (F3)
+export const liveInfo = () => ({
+  polling: !!timer, pausedInactive, hidden: document.visibilityState !== 'visible', busy,
+  lastOk, lastError, lastActivity
+});
 
 // Returns the promise of the first live list (or null while the tab is hidden)
 export function startLive() {

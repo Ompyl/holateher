@@ -1,9 +1,9 @@
 // holateher – the map: base style, saved view, vehicle symbols (images), tooltip, clicks, fitting a route.
-import { BASE_STYLE, HU_VIEW, LS, FONT, ACCENT, URLS } from './config.js?v=20261122g';
-import { $, esc, lsGet, lsSet, emit } from './util.js?v=20261122g';
-import { fmtEvn } from './evn.js?v=20261122g';
-import { state, kindOfLive, lastFreightText, delayText, motionText } from './state.js?v=20261122g';
-import { EMPTY } from './track.js?v=20261122g';
+import { BASE_STYLE, HU_VIEW, LS, FONT, ACCENT, URLS } from './config.js?v=20261122i';
+import { $, esc, lsGet, lsSet, emit } from './util.js?v=20261122i';
+import { fmtEvn } from './evn.js?v=20261122i';
+import { state, kindOfLive, lastFreightText, delayText, motionText } from './state.js?v=20261122i';
+import { EMPTY } from './track.js?v=20261122i';
 
 export let map;
 const loadedImg = new Map();          // image id -> promise (resolves when added to the map)

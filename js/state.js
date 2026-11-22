@@ -1,6 +1,6 @@
 // holateher – shared app state (filled by live.js / main.js, read by the other modules).
-import { LS } from './config.js?v=20261122g';
-import { lsGet } from './util.js?v=20261122g';
+import { LS } from './config.js?v=20261122i';
+import { lsGet } from './util.js?v=20261122i';
 
 export const state = {
   live: [],                    // last live list (all vehicles)

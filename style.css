@@ -336,3 +336,17 @@ th.acts, td.acts { width: 1%; padding-right: 8px; }
 .tip.maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: var(--line); }
 .tip.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--line); }
 .tip.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--line); }
+
+/* ---- debug view (F3 / ?debug) ---- */
+.debug {
+  position: fixed; left: 10px; top: calc(var(--bar-h) + var(--safe-t) + 10px); z-index: 9;
+  max-height: calc(100% - var(--bar-h) - var(--safe-t) - var(--foot-h) - 20px); overflow: hidden;
+  pointer-events: none; font: 12px/1.4 ui-monospace, Consolas, "DejaVu Sans Mono", monospace; color: #e8e8e8;
+}
+.debug span { display: block; width: fit-content; max-width: calc(100vw - 20px); padding: 0 4px;
+  background: rgba(0, 0, 0, .55); white-space: pre-wrap; text-shadow: 1px 1px 0 #000; }
+body.tl-open .debug { left: 56px; max-height: calc(100% - var(--bar-h) - var(--dock-h) - var(--foot-h) - 30px); }
+@media (max-width: 700px) {
+  .debug { top: calc(var(--safe-t) + 96px); font-size: 10px; }          /* below the pause pill */
+  body.tl-open .debug { left: 10px; }
+}

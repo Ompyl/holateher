@@ -319,6 +319,7 @@ Wahrheit statt der alten Ungarn.xlsx). Beschreibungen bleiben wie sie sind (teil
 | `js/selection.js` | Auswahl, Infofeld, Adresse `?loco=`, Zurück-Taste |
 | `js/table.js` | Loco-Tabelle + Excel-Export |
 | `js/menu.js` | Kopfzeile/Menü, Schalter, Zähler, Uhr + Easter Egg |
+| `js/debug.js` | Debug-Ansicht (F3 oder `?debug`): Zoom, Mitte, Live-Status, Anfragen/Traffic, Caches, Zeitachse, Rohdaten der gewählten Lok / der Lok unter der Maus |
 | `tools/bump-version.mjs` | neue `?v=` an alle eigenen Dateien |
 | `history.html` | Weiterleitung alter Links |
 | `data/loks.csv`, `data/bildkategorien.csv`, `favicon.svg`, `README.md` (Englisch) | |

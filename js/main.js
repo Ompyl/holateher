@@ -1,15 +1,16 @@
 // holateher – start: load static data, create the map and wire the modules. See PLAN.md.
-import { $, on, parseCSV } from './util.js?v=20261122g';
-import { isEvn } from './evn.js?v=20261122g';
-import { fetchIcons, stats } from './api.js?v=20261122g';
-import { state } from './state.js?v=20261122g';
-import { createMap, addVehicleLayers, drawVehicles } from './map.js?v=20261122g';
-import { addTrailLayers } from './trail.js?v=20261122g';
-import { startLive, refresh } from './live.js?v=20261122g';
-import { initMenu, menuOpen, showMenu } from './menu.js?v=20261122g';
-import { initSelection, select, unselect } from './selection.js?v=20261122g';
-import { initTimeline, tl, load, setCursor, backToLive, fitRoute } from './timeline.js?v=20261122g';
-import { initTable, showTable, tableOpen } from './table.js?v=20261122g';
+import { $, on, parseCSV } from './util.js?v=20261122i';
+import { isEvn } from './evn.js?v=20261122i';
+import { fetchIcons, stats } from './api.js?v=20261122i';
+import { state } from './state.js?v=20261122i';
+import { createMap, addVehicleLayers, drawVehicles } from './map.js?v=20261122i';
+import { addTrailLayers } from './trail.js?v=20261122i';
+import { startLive, refresh } from './live.js?v=20261122i';
+import { initMenu, menuOpen, showMenu } from './menu.js?v=20261122i';
+import { initSelection, select, unselect } from './selection.js?v=20261122i';
+import { initTimeline, tl, load, setCursor, backToLive, fitRoute } from './timeline.js?v=20261122i';
+import { initTable, showTable, tableOpen } from './table.js?v=20261122i';
+import { initDebug, toggleDebug } from './debug.js?v=20261122i';
 
 const text = url => fetch(url, { cache: 'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => '');
 
@@ -26,6 +27,7 @@ initMenu();
 initTimeline();
 initSelection();
 initTable();
+initDebug();
 on('live', drawVehicles);
 
 // Esc: menu > table > selection (the timeline handles Esc itself while it is open)
@@ -56,4 +58,4 @@ map.on('load', async () => {
 });
 
 // for testing in the console
-window.holateher = { state, map, refresh, select, unselect, api: { stats }, tl: { state: tl, load, setCursor, backToLive, fit: fitRoute } };
+window.holateher = { state, map, refresh, select, unselect, debug: toggleDebug, api: { stats }, tl: { state: tl, load, setCursor, backToLive, fit: fitRoute } };

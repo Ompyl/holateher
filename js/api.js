@@ -1,8 +1,8 @@
 // holateher – every request to realtimenext goes through here (one place to keep the traffic small).
-import { URLS, LS, ICONS_CACHE_MS, PAST_DAYS_CACHE } from './config.js?v=20261122g';
-import { lsGet, lsSet, today } from './util.js?v=20261122g';
+import { URLS, LS, ICONS_CACHE_MS, PAST_DAYS_CACHE } from './config.js?v=20261122i';
+import { lsGet, lsSet, today } from './util.js?v=20261122i';
 
-export const stats = { requests: 0, bytes: 0 };   // for testing: window.holateher.api.stats
+export const stats = { requests: 0, bytes: 0, since: Date.now() };   // for testing: window.holateher.api.stats
 
 async function getJSON(url) {
   const r = await fetch(url, { credentials: 'omit' });
@@ -49,6 +49,7 @@ export const fetchHistoryDays = evn => memo('d/' + evn, async () => {
 // Positions of one loco on one day (points with coordinates only). Past days never change: kept in memory
 // (also when switching to another loco and back), the oldest are dropped. Today is always fetched fresh.
 const pastDays = new Map();
+export const cacheInfo = () => ({ pastDays: pastDays.size, memo: once.size, iconsAge: Date.now() - (lsGet(LS.icons, null)?.t || NaN) });
 export function fetchDay(evn, day) {
   const load = () => getJSON(URLS.day(evn, day))
     .then(d => Array.isArray(d) ? d.filter(p => p.location_lat != null && p.location_lon != null) : [])
