@@ -17,7 +17,7 @@
   const POLL_MS = 10000;              // same as map.realtimenext.hu
   const IDLE_KEEP_MS = 48 * 3600e3;   // remember freight locos seen by this browser for 48 h
   const HU_VIEW = { center: [19.3, 47.2], zoom: 6.6 };
-  const LS = { view: 'holateher.view', idle: 'holateher.showIdle', seen: 'holateher.seenFreight', modelIcons: 'holateher.modelIcons', allCols: 'holateher.allCols' };
+  const LS = { view: 'holateher.view', idle: 'holateher.showIdle', pass: 'holateher.showPassenger', seen: 'holateher.seenFreight', modelIcons: 'holateher.modelIcons', allCols: 'holateher.allCols' };
 
   // ------------------------------------------------------------------
   // State
@@ -29,6 +29,7 @@
     customImg: new Map(),     // bildkategorie -> image URL
     seen: lsGet(LS.seen, {}), // EVN -> { t, zug, rel, model } last seen as freight train (this browser)
     showIdle: lsGet(LS.idle, true),
+    showPass: lsGet(LS.pass, false),   // passenger trains (off by default)
     allCols: lsGet(LS.allCols, false),
     iconUrl: new Map(),       // realtimenext icon id -> URL
     loadedImg: new Set(),
@@ -130,21 +131,22 @@
 
     const feats = [];
     state.imgByEvn.clear();
-    let nFreight = 0, nIdle = 0;
+    let nFreight = 0, nIdle = 0, nPass = 0;
     for (const v of state.live) {
       if (!v.is_rail_uic || v.location_lat == null || v.location_lon == null) continue;
       const freight = v.trainType === 'T';
-      const idle = !freight && state.showIdle && isIdleFreight(v);
-      if (!freight && !idle) continue;
-      freight ? nFreight++ : nIdle++;
+      const pass = !freight && !!v.trainType && state.showPass;      // any other train = passenger
+      const idle = !freight && !pass && state.showIdle && isIdleFreight(v);
+      if (!freight && !idle && !pass) continue;
+      if (freight) nFreight++; else if (pass) nPass++; else nIdle++;
       state.imgByEvn.set(v.rail_uic, imageFor(v, modelCat));
       feats.push({
         type: 'Feature',
         geometry: { type: 'Point', coordinates: [v.location_lon, v.location_lat] },
-        properties: { evn: v.rail_uic, zug: v.trainNumber || '', idle: !freight, img: state.imgByEvn.get(v.rail_uic), sel: v.rail_uic === state.selected }
+        properties: { evn: v.rail_uic, zug: v.trainNumber || '', idle, pass, img: state.imgByEvn.get(v.rail_uic), sel: v.rail_uic === state.selected }
       });
     }
-    return { fc: { type: 'FeatureCollection', features: feats }, nFreight, nIdle };
+    return { fc: { type: 'FeatureCollection', features: feats }, nFreight, nIdle, nPass };
   }
 
   async function refreshLive() {
@@ -156,7 +158,7 @@
       rememberFreight(list);
       await drawVehicles();
       setStatus('updated ' + new Date().toLocaleTimeString('en-GB'));
-      if (state.selected) renderPanel();
+      if (state.selected) { renderPanel(); tl.liveUpdate(); }
       if (!$('tableView').hidden) renderTable();
     } catch (e) {
       console.error(e);
@@ -165,10 +167,10 @@
   }
 
   async function drawVehicles() {
-    const { fc, nFreight, nIdle } = buildFeatures();
+    const { fc, nFreight, nIdle, nPass } = buildFeatures();
     await loadImagesFor(fc.features);
     map.getSource('vehicles')?.setData(fc);
-    $('counts').textContent = nFreight + ' live freight' + (nFreight === 1 ? '' : 's') + (state.showIdle ? ' · ' + nIdle + ' idle' : '');
+    $('counts').textContent = nFreight + ' live freight' + (nFreight === 1 ? '' : 's') + (state.showIdle ? ' · ' + nIdle + ' idle' : '') + (state.showPass ? ' · ' + nPass + ' passenger' : '');
     $('mCounts').textContent = $('counts').textContent;
   }
 
@@ -228,6 +230,18 @@
     drawVehicles();
   }
 
+  // Short text for the hover tooltip
+  function tipHtml(evn) {
+    const v = state.byEvn.get(evn), k = state.known.get(evn);
+    if (!v) return '';
+    const kind = v.trainType === 'T' ? 'Train' : v.trainType ? 'Passenger train' : null;
+    const title = kind ? kind + ' ' + (v.trainNumber || '') : fmtEvn(evn);
+    const delay = kind && v.delayMin != null && v.delayMin !== 0 ? (v.delayMin > 0 ? '+' : '') + v.delayMin + ' min' : '';
+    const line = [v.vehicleModel || k?.loktyp, delay, v.moving ? 'moving' : 'stopped'].filter(Boolean).join(' · ');
+    const rel = kind ? (v.relation || '') : (lastFreightText(evn) || 'no train');
+    return `<strong>${esc(title)}</strong>${rel ? `<div>${esc(rel)}</div>` : ''}<div class="tip-sub">${esc(line)}</div>`;
+  }
+
   function lastFreightText(evn) {
     const s = state.seen[evn], k = state.known.get(evn);
     if (s) return 'last freight train ' + s.zug + ' ' + s.rel;
@@ -241,9 +255,10 @@
     const v = state.byEvn.get(evn);
     const k = state.known.get(evn);
     const freight = v?.trainType === 'T';
-    const title = freight ? 'Train ' + esc(v.trainNumber) : (v ? 'Loco without train' : 'Loco offline');
-    const rel = freight ? (v.relation || '–') : lastFreightText(evn);
-    const delay = v?.delayMin != null && freight ? (v.delayMin > 0 ? '+' + v.delayMin + ' min' : v.delayMin + ' min') : '–';
+    const running = !!v?.trainType;                        // freight or passenger train
+    const title = freight ? 'Train ' + esc(v.trainNumber) : running ? 'Passenger train ' + esc(v.trainNumber || '') : (v ? 'Loco without train' : 'Loco offline');
+    const rel = running ? (v.relation || '–') : lastFreightText(evn);
+    const delay = v?.delayMin != null && running ? (v.delayMin > 0 ? '+' + v.delayMin + ' min' : v.delayMin + ' min') : '–';
     const html = `
       <h3>${title}</h3>
       <div class="rel">${esc(rel)}</div>
@@ -357,7 +372,8 @@
     const v = state.byEvn.get(evn);
     if (!v) return;
     showTable(false);
-    if (!state.showIdle && v.trainType !== 'T') { state.showIdle = true; $('showIdle').checked = true; lsSet(LS.idle, true); }
+    if (v.trainType && v.trainType !== 'T' && !state.showPass) setPass(true);
+    else if (!v.trainType && !state.showIdle) setIdle(true);
     map.flyTo({ center: [v.location_lon, v.location_lat], zoom: Math.max(map.getZoom(), 11) });
     select(evn);
   }
@@ -379,16 +395,26 @@
     XLSX.writeFile(wb, 'holateher-freight-locos-' + ymd(new Date()) + '.xlsx');
   }
 
+  // Layer switches (header and phone menu stay in sync)
+  function setIdle(on) {
+    state.showIdle = on; lsSet(LS.idle, on);
+    $('showIdle').checked = on; $('mShowIdle').checked = on;
+    drawVehicles();
+  }
+  function setPass(on) {
+    state.showPass = on; lsSet(LS.pass, on);
+    $('showPass').checked = on; $('mShowPass').checked = on;
+    drawVehicles();
+  }
+
   // ------------------------------------------------------------------
   // UI wiring
   // ------------------------------------------------------------------
   function wireUI() {
-    const setIdle = on => {
-      state.showIdle = on; lsSet(LS.idle, on);
-      $('showIdle').checked = on; $('mShowIdle').checked = on;
-      drawVehicles();
-    };
     $('showIdle').checked = $('mShowIdle').checked = state.showIdle;
+    $('showPass').checked = $('mShowPass').checked = state.showPass;
+    $('showPass').addEventListener('change', e => setPass(e.target.checked));
+    $('mShowPass').addEventListener('change', e => setPass(e.target.checked));
     $('showIdle').addEventListener('change', e => setIdle(e.target.checked));
     $('mShowIdle').addEventListener('change', e => setIdle(e.target.checked));
     // phone menu: opens with the button, closes on any click outside (or after choosing an action)
@@ -470,26 +496,45 @@
     map.addLayer({ id: 'vehicles', type: 'symbol', source: 'vehicles',
       layout: {
         'icon-image': ['get', 'img'],
-        'icon-size': ['interpolate', ['linear'], ['zoom'], 6, 0.16, 14, 0.3],
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 6, ['case', ['get', 'pass'], 0.12, 0.16], 14, ['case', ['get', 'pass'], 0.24, 0.3]],
         'icon-allow-overlap': true,
-        'symbol-sort-key': ['case', ['get', 'idle'], 0, 1],   // freight trains on top
-        'text-field': ['get', 'zug'], 'text-font': ['Noto Sans Regular'], 'text-size': 11,
+        'symbol-sort-key': ['case', ['get', 'idle'], 0, ['get', 'pass'], 1, 2],   // freight trains on top, then passenger
+        // passenger train numbers only when zoomed in (otherwise too many labels)
+        'text-field': ['step', ['zoom'], ['case', ['get', 'pass'], '', ['get', 'zug']], 9, ['get', 'zug']],
+        'text-font': ['Noto Sans Regular'], 'text-size': 11,
         'text-offset': [0, 1.5], 'text-anchor': 'top', 'text-optional': true
       },
       paint: {
-        'icon-opacity': ['case', ['get', 'idle'], 0.45, 1],
-        'text-color': '#1b262b', 'text-halo-color': '#ffffff', 'text-halo-width': 1.5,
-        'text-opacity': ['case', ['get', 'idle'], 0.5, 1]
+        'icon-opacity': ['case', ['get', 'idle'], 0.45, ['get', 'pass'], 0.8, 1],
+        'text-color': ['case', ['get', 'pass'], '#4a5a62', '#1b262b'], 'text-halo-color': '#ffffff', 'text-halo-width': 1.5,
+        'text-opacity': ['case', ['get', 'idle'], 0.5, ['get', 'pass'], 0.8, 1]
       } });
 
-    // If symbols overlap, a moving freight train wins over a faint idle loco
+    // If symbols overlap: freight train first, then passenger train, then idle loco
     map.on('click', 'vehicles', e => {
       const fs = e.features || [];
-      const f = fs.find(x => !x.properties.idle) || fs[0];
+      const f = fs.find(x => !x.properties.idle && !x.properties.pass) || fs.find(x => x.properties.pass) || fs[0];
       if (f) select(f.properties.evn);
     });
     map.on('mouseenter', 'vehicles', () => { map.getCanvas().style.cursor = 'pointer'; });
     map.on('mouseleave', 'vehicles', () => { map.getCanvas().style.cursor = ''; });
+
+    // Tooltip on hover (only with a mouse; phones have no hover)
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      const tip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 18, className: 'tip', maxWidth: '280px' });
+      let tipEvn = null;
+      map.on('mousemove', 'vehicles', e => {
+        const fs = e.features || [];
+        const f = fs.find(x => !x.properties.idle && !x.properties.pass) || fs.find(x => x.properties.pass) || fs[0];
+        if (!f) return;
+        const evn = f.properties.evn;
+        tip.setLngLat(f.geometry.coordinates);
+        if (evn !== tipEvn) { tipEvn = evn; tip.setHTML(tipHtml(evn)); }
+        if (!tip.isOpen()) tip.addTo(map);
+      });
+      map.on('mouseleave', 'vehicles', () => { tip.remove(); tipEvn = null; });
+      map.on('movestart', () => { tip.remove(); tipEvn = null; });
+    }
   }
 
   // Live clock in the header (ticks on the full second)

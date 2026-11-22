@@ -304,3 +304,15 @@ body.tl-open .status { display: none; }
   .tablehead input[type="search"] { flex: 1 1 100%; order: 3; }
   .credits { font-size: 10px; padding: 1px 6px; }
 }
+
+/* hover tooltip of a train (PC) */
+.tip { pointer-events: none; }
+.tip .maplibregl-popup-content {
+  background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 10px;
+  padding: 7px 10px; font: 13px/1.35 Roboto, "Segoe UI", Arial, sans-serif; box-shadow: 0 4px 14px rgba(0, 0, 0, .45);
+}
+.tip .tip-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.tip.maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--line); }
+.tip.maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: var(--line); }
+.tip.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--line); }
+.tip.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--line); }

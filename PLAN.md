@@ -51,9 +51,11 @@ Letzter Commit beim Wechsel: siehe `git log`. GitHub-Account auf dem PC: `Ompyl`
   Nachgebessert (~19:55): Infofeld 2 Zeilen (Titel + „Strecke · Typ · Verspätung · Status“), Info/Photos als Icons neben ×;
   Leiste ohne Zugliste, Tempo vor Zugnummer, Tempo-Knopf `#speedBtn` (1x→2x→…→100x) rechts neben der Tagesauswahl.
   Überall: „Datasheet“ heißt jetzt „Vehicle info ↗“; „This train“ ist an früheren Tagen ausgeblendet.
+  Personenzüge per Schalter („passenger trains“, `localStorage holateher.showPassenger`, kleiner/blasser, Nummer ab Zoom 9).
+  Tooltip beim Überfahren eines Zuges am PC (nur mit Maus, `matchMedia('(hover: hover)')`). Spur wächst bei jedem Live-Update mit (`tl.liveUpdate`).
   Zurück-Taste (Handy/Browser) schließt die Auswahl: `select` legt einen Verlaufseintrag `{sel: true}` an, `unselect` geht zurück, `popstate` schließt.
   Am Handy testen: `python -m http.server 8766 --bind 0.0.0.0 --directory "C:\Users\Emil\Documents\HOP\holateher"` →
-  `http://192.168.178.101:8766/` (WLAN) bzw. Tailscale `http://100.72.203.93:8766/`.
+  `http://<PC-IP im WLAN>:8766/` bzw. über die Tailscale-Adresse des PCs.
 
 ### Arbeitsweise / Wünsche von Emil
 

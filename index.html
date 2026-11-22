@@ -20,6 +20,9 @@
       <label class="toggle" title="Show known freight locos that currently have no train (faint)">
         <input type="checkbox" id="showIdle"> idle freight locos
       </label>
+      <label class="toggle" title="Also show passenger trains (smaller, behind the freight trains)">
+        <input type="checkbox" id="showPass"> passenger trains
+      </label>
       <button id="btnTable" type="button" title="Table of known freight locos">Locos</button>
       <button id="btnGoogle" class="iconbtn" type="button" title="Open the current view in Google Maps" aria-label="Open in Google Maps">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"/></svg>
@@ -38,6 +41,7 @@
     <div class="menu-head"><strong>holateher</strong><span id="mClock" class="menu-clock"></span></div>
     <div id="mCounts" class="menu-counts">loading …</div>
     <label class="menu-item toggle"><input type="checkbox" id="mShowIdle"> Idle freight locos</label>
+    <label class="menu-item toggle"><input type="checkbox" id="mShowPass"> Passenger trains</label>
     <button type="button" class="menu-item" data-menu="table">Locos (table)</button>
     <button type="button" class="menu-item" data-menu="google">Open in Google Maps ↗</button>
     <button type="button" class="menu-item" data-menu="orm">Open in OpenRailwayMap ↗</button>

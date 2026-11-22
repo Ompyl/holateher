@@ -147,17 +147,19 @@
       return { start: end - Math.max(1, n) * 86400 + 1, end };
     }
 
+    // "this train" only makes sense for the train running now
+    const effectiveRange = () => state.range === 0 && !endsNow() ? 1 : state.range;
+
+    // Fetch the positions of the window, then build the route
     async function load(day, o = {}) {
       if (!state.open) return;
       const token = ++state.loadToken;
       const evn = state.evn;
-      const wasAtEnd = !state.pts.length || state.cur >= state.pts.length - 1;
-      const keepTime = o.keep && !wasAtEnd ? state.times[state.cur] : null;
       if (!o.keep) stop();
       state.day = day;
-      // "this train" only makes sense for the train running now
-      const range = state.range === 0 && !endsNow() ? 1 : state.range;
-      const { start, end } = windowRange(range === 0 ? 2 : range);
+      state.raw = null;                       // no live extension while loading
+      const range = effectiveRange();
+      const { start } = windowRange(range === 0 ? 2 : range);
       const wanted = daysBetween(ymd(new Date(start * 1000)), day).filter(d => d === today() || !state.days.length || state.daySet.has(d));
       opts.onUrl?.(evn, endsNow() ? null : day, state.range);
       updateDayButtons();
@@ -166,7 +168,24 @@
 
       const parts = await Promise.all(wanted.map(d => cachedDayPoints(evn, d)));
       if (token !== state.loadToken || !state.open) return;
-      let pts = parts.flat().filter(p => p.time >= start && p.time <= end).sort((a, b) => a.time - b.time);
+      state.raw = parts.flat().sort((a, b) => a.time - b.time);
+      build(o);
+    }
+
+    // Live update (every live poll): extend the route to the loco's new live position, without a new request
+    function liveUpdate() {
+      if (state.open && state.raw && endsNow()) build({ keep: true });
+    }
+
+    // Route, stops, trains and slider from the fetched positions (+ the current live position at the end)
+    function build(o = {}) {
+      if (!state.open || !state.raw) return;
+      const evn = state.evn, day = state.day;
+      const wasAtEnd = !state.pts.length || state.cur >= state.pts.length - 1;
+      const keepTime = o.keep && !wasAtEnd ? state.times[state.cur] : null;
+      const range = effectiveRange();
+      const { start, end } = windowRange(range === 0 ? 2 : range);
+      let pts = state.raw.filter(p => p.time >= start && p.time <= end);
       // live position at the end of the timeline
       const v = endsNow() ? opts.getLive?.(evn) : null;
       if (v && v.location_lat != null && pts.length) {
@@ -534,7 +553,7 @@
 
     wireUI();
     return {
-      state, open, close, load, setCursor, backToLive,
+      state, open, close, load, liveUpdate, setCursor, backToLive,
       isOpen: () => state.open, isLive: () => state.live, fit: () => fit(state.coords)
     };
   };
