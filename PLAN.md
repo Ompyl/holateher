@@ -7,6 +7,56 @@ basierend auf den Daten von realtimenext.hu. Ziel: erreichbar unter
 Stand: 22.11.2026. Herkunft: das Userscript in `..\HUMAP\realtimenext-worldmap.user.js`
 (Tempo-Farben, Halte, Güterzug-Filter), Wissen in `..\HUMAP\NOTIZEN.md`.
 
+## ▶ Übergabe für den nächsten Chat (zuerst lesen)
+
+**Status:** Online unter https://ompyl.github.io/holateher/ · Repo https://github.com/Ompyl/holateher
+(öffentlich, Branch `main`, GitHub Pages aus `main` / Root, Build dauert ~1 min).
+Letzter Commit beim Wechsel: siehe `git log`. GitHub-Account auf dem PC: `Ompyl` (gh CLI angemeldet).
+
+### Offene Aufgaben (als Nächstes)
+
+- Keine. Zuletzt erledigt (22.11. ~17:45): Untertitel weg, Zähler „4 live freights · 17 idle“;
+  Loco-Fenster `calc(100% - 48px)` breit, Standardspalten ohne Kind/Registered/Route
+  (Schalter „All columns“, `localStorage holateher.allCols`), Knöpfe als Icons mit Tooltip,
+  Description/Route nehmen den freien Platz und werden mit „…“ gekürzt (voller Text als `title`).
+  Geprüft: kein horizontaler Scrollbalken bei 1920 px (auch mit allen Spalten) und 1024 px
+  (Standardspalten; mit „All columns“ scrollt es bei 1024 px seitlich – bewusst so gelassen).
+- **OpenRailwayMap als Hintergrund: ausprobiert und auf Emils Wunsch wieder entfernt (22.11.)** – danach sah er keine Loks mehr
+  (vermutlich Browser-Cache: neue app.js mit alter common.js → `addRailwayLayers is not a function`). Wissen für einen neuen Versuch:
+  Vektor-Kacheln `https://openrailwaymap.app/standard_railway_line_low` (bis z7) und `/railway_line_high,railway_text_km` (ab z7),
+  normales MVT, CORS ok mit echtem Referer; ORMs `style.json` geht nicht (kein CORS, braucht MapLibre ≥ 5).
+  Nutzungsregeln: https://github.com/hiddewie/OpenRailwayMap-vector/blob/master/USAGE.md (öffentliche Seite + Quellenangabe).
+  Beim nächsten Mal Cache-Busting (`common.js?v=…`) mitmachen.
+
+### Arbeitsweise / Wünsche von Emil
+
+- Emil schreibt Deutsch (locker, Tippfehler normal) → auf Deutsch antworten. **Die Webseite selbst ist komplett Englisch.**
+- **Änderungen lokal lassen, nicht nach jeder Aufgabe committen/pushen.** Emil schaut lokal (http://localhost:8765/) und sagt selbst, wann gepusht wird; nur erinnern, wenn sich länger viel Ungepushtes ansammelt. Ablauf beim Push: committen (mit Co-Authored-By-Zeile) → `git push` → Pages-Build abwarten (`gh run watch`) → echte Seite prüfen.
+- Design: modern, dunkle Oberfläche (#1b262b), Strecken flach + halbtransparent (kein Glow), Halte ohne Kontur. Links zu fremden Seiten immer im neuen Tab (↗).
+- Nicht unnötig viele Anfragen an realtimenext (kleine Hobby-Seite): Live-Liste nur alle 10 s und nur bei sichtbarem Tab.
+
+### Lokal testen
+
+- Server: im Ordner `python -m http.server 8765 --bind 127.0.0.1` (im Hintergrund), dann im eingebauten Browser `http://localhost:8765/`.
+  `preview_start` mit Namen klappte nicht (sucht `.claude/launch.json` im falschen Ordner) → `preview_start` mit `url` benutzen.
+- Testseiten: Live `index.html`; History z. B. `history.html?loco=918061932367&days=7` (Vectron, fuhr 15.–21.11. bis Frankfurt/Ruhr/München)
+  oder `history.html?loco=918112932044` (Vectron 42082 Hodoš → Soroksári út).
+- Zum Testen sind Objekte offen: `window.holateher` (Live: `state`, `map`, `select(evn)`, `refreshLive`) und `window.holateherHistory` (`state`, `map`, `setCursor(i)`, `load(day)`).
+- Ist der Browser-Bereich in der App ausgeblendet, zeichnet die Karte nicht (requestAnimationFrame pausiert) → Emil bitten, ihn einzublenden (Strg+Umschalt+B), oder nur Logik per JS prüfen.
+- Alte Fehlermeldungen „An image named "arrow" already exists“ in der Konsole stammen aus einer früheren app.js-Fassung (verweisen auf Zeile ~610), nicht aus dem aktuellen Code.
+
+### Dateien kurz
+
+| Datei | Inhalt |
+|---|---|
+| `index.html` + `app.js` | Live-Karte: Filter `trainType === 'T'`, blasse stehende Güterloks (in `loks.csv` oder vom Browser in 48 h als Güterzug gesehen), Infofeld mit gefahrenem Weg, Loco-Tabelle mit Excel-Export (SheetJS lazy), Knöpfe History / Datasheet ↗ / Photos ↗ |
+| `history.html` + `history.js` | History: Kalender, 1/3/7 Tage, Regler, Abspielen, Tasten (Space, `,` `.`, A/D, Q/E), Zug-Liste, Kennzahlen |
+| `common.js` (`window.HT`) | Helfer, Länder/Lokart aus EVN, `buildSpeedGeo` (stufenlose Farbe, ±2 geglättet, `age`, `pi`/`pj`), `buildStopGeo`, `addTrailLayers`, `setTrailCursor`, Legende, Google/ORM, `historyUrl`, `datasheetUrl` (realtimenext), `photosUrl` (bahnbilder.de, Kurznummer) |
+| `style.css` | Styles beider Seiten |
+| `data/loks.csv` | bekannte Güterloks (statt Ungarn.xlsx): `evn, beschreibung, loktyp, bildkategorie, letzter_gueterzug, letzte_strecke, zuletzt_gueterzug, notiz` |
+| `data/bildkategorien.csv` | eigene Bilder: `kategorie,bild` (noch leer) |
+| `favicon.svg` | Favicon (Güterlok) |
+
 ## Datenquellen (alle ohne Anmeldung, CORS `*`, getestet mit Origin github.io)
 
 | Was | Adresse |
@@ -64,7 +114,7 @@ behandelt; Ersatz = häufigste Kategorie derselben Bauart in der Live-Liste, son
   `zuletzt_gueterzug` / `letzter_gueterzug` aktualisieren (Grundlage für Statistik).
 - Statistik pro Lok (km, Grenzübertritte, Einsatztage).
 - Personenzüge optional einblendbar.
-- OpenRailwayMap als Hintergrund.
+- OpenRailwayMap als Hintergrund (erster Versuch zurückgenommen, siehe oben).
 - Dunkler Modus, Handy-Ansicht.
 - Beobachtungsliste mit Browser-Meldung, Filter (Typ/Land/Grenze), Grenzübertritte heute,
   Links zum Teilen (`?lok=…`), Suche.

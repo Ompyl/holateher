@@ -13,7 +13,6 @@
   <header id="bar">
     <div class="brand">
       <a class="logo" href="./">holateher</a>
-      <span class="sub">Freight trains in Hungary, live</span>
     </div>
     <div id="counts" class="counts">loading …</div>
     <div class="tools">
@@ -45,6 +44,9 @@
     <div class="tablehead">
       <h2>Known freight locos</h2>
       <input id="tableFilter" type="search" placeholder="Filter (number, type, route …)">
+      <label class="toggle" title="Also show Kind, Registered and Route">
+        <input type="checkbox" id="allCols"> All columns
+      </label>
       <button id="btnExport" type="button">Export to Excel</button>
       <button id="tableClose" type="button" class="close" aria-label="Close">×</button>
     </div>

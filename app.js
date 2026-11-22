@@ -18,7 +18,7 @@
   const TRAIL_REFRESH_MS = 60000;     // reload the selected train's route
   const IDLE_KEEP_MS = 48 * 3600e3;   // remember freight locos seen by this browser for 48 h
   const HU_VIEW = { center: [19.3, 47.2], zoom: 6.6 };
-  const LS = { view: 'holateher.view', idle: 'holateher.showIdle', seen: 'holateher.seenFreight', modelIcons: 'holateher.modelIcons' };
+  const LS = { view: 'holateher.view', idle: 'holateher.showIdle', seen: 'holateher.seenFreight', modelIcons: 'holateher.modelIcons', allCols: 'holateher.allCols' };
 
   // ------------------------------------------------------------------
   // State
@@ -30,6 +30,7 @@
     customImg: new Map(),     // bildkategorie -> image URL
     seen: lsGet(LS.seen, {}), // EVN -> { t, zug, rel, model } last seen as freight train (this browser)
     showIdle: lsGet(LS.idle, true),
+    allCols: lsGet(LS.allCols, false),
     iconUrl: new Map(),       // realtimenext icon id -> URL
     loadedImg: new Set(),
     selected: null,
@@ -158,7 +159,7 @@
     const { fc, nFreight, nIdle } = buildFeatures();
     await loadImagesFor(fc.features);
     map.getSource('vehicles')?.setData(fc);
-    $('counts').textContent = nFreight + ' freight trains' + (state.showIdle ? ' · ' + nIdle + ' idle' : '');
+    $('counts').textContent = nFreight + ' live freight' + (nFreight === 1 ? '' : 's') + (state.showIdle ? ' · ' + nIdle + ' idle' : '');
   }
 
   function setStatus(text, error) {
@@ -289,17 +290,31 @@
   // ------------------------------------------------------------------
   // Table of known freight locos
   // ------------------------------------------------------------------
+  // extra: only shown with "All columns"; grow: takes the free width, long text is cut with "…"
   const COLS = [
-    { key: 'status', label: 'Status' },
-    { key: 'evnFmt', label: 'Number' },
-    { key: 'beschreibung', label: 'Description' },
+    { key: 'status', label: 'Status', cell: r => `<td class="${r.cls}">${esc(r.status)}</td>` },
+    { key: 'evnFmt', label: 'Number', cell: r => `<td class="num">${esc(r.evnFmt)}${r.isNew ? '<span class="tag">new</span>' : ''}</td>` },
+    { key: 'beschreibung', label: 'Description', grow: true },
     { key: 'loktyp', label: 'Type' },
-    { key: 'kind', label: 'Kind' },
-    { key: 'country', label: 'Registered' },
-    { key: 'zug', label: 'Last freight train' },
-    { key: 'strecke', label: 'Route' },
-    { key: 'zuletzt', label: 'Last seen' }
+    { key: 'kind', label: 'Kind', extra: true },
+    { key: 'country', label: 'Registered', extra: true },
+    { key: 'zug', label: 'Last freight train', num: true },
+    { key: 'strecke', label: 'Route', extra: true, grow: true },
+    { key: 'zuletzt', label: 'Last seen', num: true }
   ];
+  const ICONS = {
+    history: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></g></svg>',
+    info: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></g></svg>',
+    photos: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v13H4z"/><circle cx="12" cy="13" r="3.5"/></g></svg>',
+    map: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"/></svg>'
+  };
+  const visibleCols = () => COLS.filter(c => state.allCols || !c.extra);
+  function cellHtml(c, r) {
+    if (c.cell) return c.cell(r);
+    const v = esc(r[c.key]);
+    if (c.grow) return `<td class="grow" title="${v}">${v}</td>`;
+    return `<td${c.num ? ' class="num"' : ''}>${v}</td>`;
+  }
   const tableSort = { key: 'status', desc: false };
 
   function tableRows() {
@@ -338,24 +353,17 @@
   }
 
   function renderTable() {
+    const cols = visibleCols();
     const thead = $('lokTable').tHead, tbody = $('lokTable').tBodies[0];
-    thead.innerHTML = '<tr>' + COLS.map(c => `<th data-key="${c.key}" class="${tableSort.key === c.key ? 'sorted' + (tableSort.desc ? ' desc' : '') : ''}">${c.label}</th>`).join('') + '<th></th></tr>';
+    thead.innerHTML = '<tr>' + cols.map(c => `<th data-key="${c.key}" class="${tableSort.key === c.key ? 'sorted' + (tableSort.desc ? ' desc' : '') : ''}">${c.label}</th>`).join('') + '<th class="acts"></th></tr>';
     tbody.innerHTML = tableRows().map(r => `
       <tr>
-        <td class="${r.cls}">${esc(r.status)}</td>
-        <td class="num">${esc(r.evnFmt)}${r.isNew ? '<span class="tag">new</span>' : ''}</td>
-        <td>${esc(r.beschreibung)}</td>
-        <td>${esc(r.loktyp)}</td>
-        <td>${esc(r.kind)}</td>
-        <td>${esc(r.country)}</td>
-        <td class="num">${esc(r.zug)}</td>
-        <td>${esc(r.strecke)}</td>
-        <td class="num">${esc(r.zuletzt)}</td>
-        <td>
-          <a class="btn small" href="${historyUrl(r.evn)}">History</a>
-          <a class="btn small" href="${datasheetUrl(r.evn)}" target="_blank" rel="noopener" title="Vehicle page on realtimenext.hu (new tab)">Info ↗</a>
-          <a class="btn small" href="${photosUrl(r.evn)}" target="_blank" rel="noopener" title="Photos of “${esc(shortNo(r.evn))}” on bahnbilder.de (new tab)">Photos ↗</a>
-          ${r.online ? `<button type="button" class="small" data-show="${r.evn}">Map</button>` : ''}
+        ${cols.map(c => cellHtml(c, r)).join('')}
+        <td class="acts">
+          <a class="rowbtn" href="${historyUrl(r.evn)}" title="History" aria-label="History">${ICONS.history}</a>
+          <a class="rowbtn" href="${datasheetUrl(r.evn)}" target="_blank" rel="noopener" title="Vehicle page on realtimenext.hu (new tab)" aria-label="Info">${ICONS.info}</a>
+          <a class="rowbtn" href="${photosUrl(r.evn)}" target="_blank" rel="noopener" title="Photos of “${esc(shortNo(r.evn))}” on bahnbilder.de (new tab)" aria-label="Photos">${ICONS.photos}</a>
+          ${r.online ? `<button type="button" class="rowbtn" data-show="${r.evn}" title="Show on map" aria-label="Show on map">${ICONS.map}</button>` : '<span class="rowbtn ghost"></span>'}
         </td>
       </tr>`).join('');
   }
@@ -404,6 +412,8 @@
     $('tableClose').addEventListener('click', () => showTable(false));
     $('tableBackdrop').addEventListener('click', () => showTable(false));   // click next to the window closes it
     $('tableFilter').addEventListener('input', renderTable);
+    $('allCols').checked = state.allCols;
+    $('allCols').addEventListener('change', e => { state.allCols = e.target.checked; lsSet(LS.allCols, state.allCols); renderTable(); });
     $('btnExport').addEventListener('click', () => exportExcel().catch(e => { console.error(e); alert('Excel export failed.'); }));
     $('lokTable').addEventListener('click', e => {
       const th = e.target.closest('th[data-key]');
