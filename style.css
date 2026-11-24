@@ -108,12 +108,29 @@ body.tl-open .status { bottom: calc(var(--dock-h) + var(--foot-h) + 14px); }
 .tools { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: none; }
 .toggle { display: flex; align-items: center; gap: 6px; color: var(--muted); cursor: pointer; white-space: nowrap; user-select: none; }
 .iconbtn { width: 34px; height: 32px; padding: 0; }
-.railsel { display: flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
-.railsel select {
-  font: inherit; color: var(--fg); background: var(--bg2); border: 1px solid var(--line); border-radius: 8px;
-  height: 32px; padding: 0 6px; cursor: pointer; color-scheme: dark;
+.railsel { position: relative; margin-left: 10px; }                 /* a bit apart from the layer switches */
+.railbtn { height: 32px; gap: 7px; padding: 0 8px 0 9px; }
+.railbtn svg { width: 17px; height: 17px; }
+.railbtn .rl { color: var(--muted); }
+.railbtn b { font-weight: 600; }
+.railbtn .chev { width: 14px; height: 14px; color: var(--muted); transition: transform .15s; }
+.railsel.open .railbtn { background: var(--bg3); }
+.railsel.open .chev { transform: rotate(180deg); }
+.railmenu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; min-width: 270px; padding: 5px;
+  display: flex; flex-direction: column; gap: 2px;
+  background: rgba(27, 38, 43, .96); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
 }
-.iconbtn svg { width: 18px; height: 18px; }
+.railmenu[hidden] { display: none; }
+.railmenu button {
+  justify-content: flex-start; gap: 11px; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; text-align: left;
+}
+.railmenu button:hover { background: var(--bg3); }
+.railmenu button[aria-selected="true"] { background: rgba(31, 138, 138, .22); box-shadow: inset 3px 0 0 var(--accent); }
+.railmenu button svg { width: 22px; height: 22px; }
+.railmenu span { display: flex; flex-direction: column; line-height: 1.25; }
+.railmenu b { font-weight: 600; }
+.railmenu small { color: var(--muted); font-size: 11.5px; white-space: normal; }
 @media (max-width: 1150px) { .clock { display: none; } }      /* centred clock would run into the switches */
 
 @media (max-width: 700px) {
@@ -142,9 +159,10 @@ body.tl-open .status { bottom: calc(var(--dock-h) + var(--foot-h) + 14px); }
   .tools .toggle span::first-letter { text-transform: uppercase; }
   .tools .toggle span { display: inline-block; }
   .tools .iconbtn svg { display: none; }
-  .tools .railsel { padding: 0; color: var(--fg); gap: 10px; }
-  .tools .railsel span { padding-left: 2px; }
-  .tools .railsel select { flex: 1; height: 40px; font-size: 15px; }
+  .tools .railsel { padding: 0; margin: 8px 0 0; }
+  .tools .railbtn { width: 100%; height: auto; padding: 10px 12px; font-size: 15px; justify-content: flex-start; }
+  .tools .railbtn .chev { margin-left: auto; }
+  .tools .railmenu { position: static; min-width: 0; margin-top: 6px; background: var(--bg2); box-shadow: none; }
 }
 
 /* ---------- info panel ---------- */

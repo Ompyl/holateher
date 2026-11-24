@@ -1,7 +1,7 @@
 // holateher – pure route calculations (no map, no DOM): speed pieces, stops, train list, figures.
-import { TRACK, SPEED_CAP } from './config.js?v=20261124d';
-import { distM, durText, hhmm } from './util.js?v=20261124d';
-import { looksFreight, cleanRoute } from './evn.js?v=20261124d';
+import { TRACK, SPEED_CAP } from './config.js?v=20261124g';
+import { distM, durText, hhmm } from './util.js?v=20261124g';
+import { looksFreight, cleanRoute } from './evn.js?v=20261124g';
 
 export const EMPTY = { type: 'FeatureCollection', features: [] };
 const fc = features => ({ type: 'FeatureCollection', features });

@@ -1,11 +1,11 @@
 // holateher – window "Known freight locos": loks.csv + freight locos this browser saw in 48 h, sorting, filter, Excel.
-import { LS } from './config.js?v=20261124d';
-import { $, esc, lsGet, lsSet, ymd, loadScript, on } from './util.js?v=20261124d';
-import { fmtEvn, kindOf, countryOf, shortNo, locoUrl, vehicleUrl, photosUrl } from './evn.js?v=20261124d';
-import { state } from './state.js?v=20261124d';
-import { map } from './map.js?v=20261124d';
-import { setIdle, setPass } from './menu.js?v=20261124d';
-import { select, ICONS } from './selection.js?v=20261124d';
+import { LS } from './config.js?v=20261124g';
+import { $, esc, lsGet, lsSet, ymd, loadScript, on } from './util.js?v=20261124g';
+import { fmtEvn, kindOf, countryOf, shortNo, locoUrl, vehicleUrl, photosUrl } from './evn.js?v=20261124g';
+import { state } from './state.js?v=20261124g';
+import { map } from './map.js?v=20261124g';
+import { setIdle, setPass } from './menu.js?v=20261124g';
+import { select, ICONS } from './selection.js?v=20261124g';
 
 // extra: only with "All columns"; grow: takes the free width, long text cut with "…"
 const COLS = [

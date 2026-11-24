@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#1b262b">
   <title>holateher – freight trains live</title>
   <meta name="description" content="Live map of freight trains in Hungary (data: realtimenext.hu)">
-  <link rel="icon" href="favicon.svg?v=20261124d" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=20261124g" type="image/svg+xml">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.24.1/maplibre-gl.css">
-  <link rel="stylesheet" href="style.css?v=20261124d">
+  <link rel="stylesheet" href="style.css?v=20261124g">
 </head>
 <body>
   <div id="map"></div>
@@ -29,9 +29,11 @@
       <label class="toggle" title="Also show passenger trains (smaller, behind the freight trains)">
         <input type="checkbox" id="showPass"><span>passenger trains</span>
       </label>
-      <label class="railsel" title="Railway lines from OpenRailwayMap">
-        <span>Rails</span><select id="railMode" aria-label="Railway layer"></select>
-      </label>
+      <div class="railsel" id="railSel">
+        <button id="railBtn" class="railbtn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="railMenu"
+          title="Railway lines from OpenRailwayMap"></button>
+        <div id="railMenu" class="railmenu" role="listbox" aria-label="Railway layer" hidden></div>
+      </div>
       <button id="btnTable" type="button" title="Table of known freight locos">Locos<span class="phone-only">(table)</span></button>
       <button id="btnGoogle" class="iconbtn" type="button" title="Open the current view in Google Maps" aria-label="Open in Google Maps">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"/></svg>
@@ -114,6 +116,6 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.24.1/maplibre-gl.js"></script>
-  <script type="module" src="js/main.js?v=20261124d"></script>
+  <script type="module" src="js/main.js?v=20261124g"></script>
 </body>
 </html>

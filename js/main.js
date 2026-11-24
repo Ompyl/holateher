@@ -1,17 +1,17 @@
 // holateher – start: load static data, create the map and wire the modules. See PLAN.md.
-import { $, on, parseCSV } from './util.js?v=20261124d';
-import { isEvn } from './evn.js?v=20261124d';
-import { fetchIcons, stats } from './api.js?v=20261124d';
-import { state } from './state.js?v=20261124d';
-import { createMap, addVehicleLayers, drawVehicles } from './map.js?v=20261124d';
-import { addTrailLayers } from './trail.js?v=20261124d';
-import { startLive, refresh } from './live.js?v=20261124d';
-import { initMenu, menuOpen, showMenu } from './menu.js?v=20261124d';
-import { initSelection, select, unselect } from './selection.js?v=20261124d';
-import { initTimeline, tl, load, setCursor, backToLive, fitRoute } from './timeline.js?v=20261124d';
-import { initTable, showTable, tableOpen } from './table.js?v=20261124d';
-import { initDebug, toggleDebug } from './debug.js?v=20261124d';
-import { loadRailStyle, buildStyle, initRails } from './rails.js?v=20261124d';
+import { $, on, parseCSV } from './util.js?v=20261124g';
+import { isEvn } from './evn.js?v=20261124g';
+import { fetchIcons, stats } from './api.js?v=20261124g';
+import { state } from './state.js?v=20261124g';
+import { createMap, addVehicleLayers, drawVehicles } from './map.js?v=20261124g';
+import { addTrailLayers } from './trail.js?v=20261124g';
+import { startLive, refresh } from './live.js?v=20261124g';
+import { initMenu, menuOpen, showMenu } from './menu.js?v=20261124g';
+import { initSelection, select, unselect } from './selection.js?v=20261124g';
+import { initTimeline, tl, load, setCursor, backToLive, fitRoute } from './timeline.js?v=20261124g';
+import { initTable, showTable, tableOpen } from './table.js?v=20261124g';
+import { initDebug, toggleDebug } from './debug.js?v=20261124g';
+import { loadRailStyle, buildStyle, initRails } from './rails.js?v=20261124g';
 
 const text = url => fetch(url, { cache: 'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => '');
 
