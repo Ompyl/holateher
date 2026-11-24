@@ -1,9 +1,9 @@
 // holateher – header bar (desktop) = fold-out menu (phone): counts, clock, layer switches, links.
-import { LS } from './config.js?v=20261124g';
-import { $, lsSet, on, emit, clockText } from './util.js?v=20261124g';
-import { googleUrl, ormUrl, openTab } from './evn.js?v=20261124g';
-import { state } from './state.js?v=20261124g';
-import { map, drawVehicles } from './map.js?v=20261124g';
+import { LS } from './config.js?v=20261124h';
+import { $, lsSet, on, emit, clockText } from './util.js?v=20261124h';
+import { googleUrl, ormUrl, openTab } from './evn.js?v=20261124h';
+import { state } from './state.js?v=20261124h';
+import { map, drawVehicles } from './map.js?v=20261124h';
 
 const bar = () => $('bar');
 export const menuOpen = () => document.body.classList.contains('menu-open');

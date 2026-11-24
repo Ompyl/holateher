@@ -1,9 +1,9 @@
 // holateher – map layers of the timeline: route by speed, gaps, stops (clustered), and the loco marker.
-import { SPEED_STOPS, STOP_COLOR, STOP_CORE_COLOR, ACCENT, FONT, LS, URLS } from './config.js?v=20261124g';
-import { lsGet } from './util.js?v=20261124g';
-import { EMPTY } from './track.js?v=20261124g';
-import { fetchVehicle } from './api.js?v=20261124g';
-import { map, fallbackIcon } from './map.js?v=20261124g';
+import { SPEED_STOPS, STOP_COLOR, STOP_CORE_COLOR, ACCENT, FONT, LS, URLS } from './config.js?v=20261124h';
+import { lsGet } from './util.js?v=20261124h';
+import { EMPTY } from './track.js?v=20261124h';
+import { fetchVehicle } from './api.js?v=20261124h';
+import { map, fallbackIcon } from './map.js?v=20261124h';
 
 const MARKER_IMG = 'tl-loco';
 const OFFSET = 2;               // right of the travel direction: out and back side by side

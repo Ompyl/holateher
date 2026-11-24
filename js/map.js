@@ -1,9 +1,9 @@
 // holateher – the map: base style, saved view, vehicle symbols (images), tooltip, clicks, fitting a route.
-import { BASE_STYLE, HU_VIEW, LS, FONT, ACCENT, URLS } from './config.js?v=20261124g';
-import { $, esc, lsGet, lsSet, emit } from './util.js?v=20261124g';
-import { fmtEvn } from './evn.js?v=20261124g';
-import { state, kindOfLive, lastFreightText, delayText, motionText } from './state.js?v=20261124g';
-import { EMPTY } from './track.js?v=20261124g';
+import { BASE_STYLE, HU_VIEW, LS, FONT, ACCENT, URLS } from './config.js?v=20261124h';
+import { $, esc, lsGet, lsSet, emit } from './util.js?v=20261124h';
+import { fmtEvn } from './evn.js?v=20261124h';
+import { state, kindOfLive, lastFreightText, delayText, motionText } from './state.js?v=20261124h';
+import { EMPTY } from './track.js?v=20261124h';
 
 export let map;
 const loadedImg = new Map();          // image id -> promise (resolves when added to the map)
@@ -93,7 +93,11 @@ export function addVehicleLayers() {
       'symbol-sort-key': ['get', 'rank'],                         // freight on top, then passenger, then idle
       // zoom step outermost (MapLibre rule); passenger numbers only from zoom 9
       'text-field': ['step', ['zoom'], ['case', ['get', 'pass'], '', ['get', 'zug']], 9, ['get', 'zug']],
-      'text-font': FONT, 'text-size': 11, 'text-offset': [0, 1.5], 'text-anchor': 'top', 'text-optional': true
+      // number just below the icon: the offset (in em of 11 px) grows with the icon size
+      'text-offset': ['interpolate', ['linear'], ['zoom'],
+        6, ['case', ['get', 'pass'], ['literal', [0, 1.3]], ['literal', [0, 1.75]]],
+        14, ['case', ['get', 'pass'], ['literal', [0, 2.5]], ['literal', [0, 3.2]]]],
+      'text-font': FONT, 'text-size': 11, 'text-anchor': 'top', 'text-optional': true
     },
     paint: {
       'icon-opacity': ['case', ['get', 'idle'], 0.45, ['get', 'pass'], 0.8, 1],

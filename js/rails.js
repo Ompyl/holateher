@@ -1,8 +1,8 @@
 // holateher – railway lines from OpenRailwayMap (vector tiles, original ORM dark style) with a switcher:
 // Off · Tracks · Electrification · Train protection. The style is a cleaned snapshot in data/ormstyle.json
 // (tools/fetch-orm-style.mjs); the tiles come live from openrailwaymap.app. Fallback: ORM raster tiles.
-import { BASE_STYLE, LS } from './config.js?v=20261124g';
-import { $, lsGet, lsSet } from './util.js?v=20261124g';
+import { BASE_STYLE, LS } from './config.js?v=20261124h';
+import { $, lsGet, lsSet } from './util.js?v=20261124h';
 
 // [mode, label, description, pictogram (24x24 SVG content, stroke = currentColor), colour]
 const svg = (body, color) => `<svg viewBox="0 0 24 24" aria-hidden="true" style="color:${color}"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
@@ -29,7 +29,7 @@ const origVis = new Map();          // ORM layer id -> its own visibility (an ex
 export async function loadRailStyle() {
   if (maplibregl.supported && !maplibregl.supported()) return null;
   try {
-    const r = await fetch('data/ormstyle.json?v=20261124g');
+    const r = await fetch('data/ormstyle.json?v=20261124h');
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();
   } catch (e) {

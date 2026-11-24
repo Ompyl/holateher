@@ -1,10 +1,10 @@
 // holateher – live list polling: every 10 s, only while the tab is visible and someone is using the page.
 // After 10 min without mouse / touch / key the polling pauses; the next interaction resumes it at once.
-import { POLL_MS, INACTIVE_MS, SEEN_KEEP_MS, LS } from './config.js?v=20261124g';
-import { $, lsSet, emit, clockText } from './util.js?v=20261124g';
-import { isEvn } from './evn.js?v=20261124g';
-import { fetchLive } from './api.js?v=20261124g';
-import { state } from './state.js?v=20261124g';
+import { POLL_MS, INACTIVE_MS, SEEN_KEEP_MS, LS } from './config.js?v=20261124h';
+import { $, lsSet, emit, clockText } from './util.js?v=20261124h';
+import { isEvn } from './evn.js?v=20261124h';
+import { fetchLive } from './api.js?v=20261124h';
+import { state } from './state.js?v=20261124h';
 
 let timer = null, lastActivity = Date.now(), pausedInactive = false, busy = false, lastOk = 0, lastError = '';
 
