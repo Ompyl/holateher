@@ -1,18 +1,18 @@
 // holateher – the map: base style, saved view, vehicle symbols (images), tooltip, clicks, fitting a route.
-import { BASE_STYLE, HU_VIEW, LS, FONT, ACCENT, URLS } from './config.js?v=20261122i';
-import { $, esc, lsGet, lsSet, emit } from './util.js?v=20261122i';
-import { fmtEvn } from './evn.js?v=20261122i';
-import { state, kindOfLive, lastFreightText, delayText, motionText } from './state.js?v=20261122i';
-import { EMPTY } from './track.js?v=20261122i';
+import { BASE_STYLE, HU_VIEW, LS, FONT, ACCENT, URLS } from './config.js?v=20261124d';
+import { $, esc, lsGet, lsSet, emit } from './util.js?v=20261124d';
+import { fmtEvn } from './evn.js?v=20261124d';
+import { state, kindOfLive, lastFreightText, delayText, motionText } from './state.js?v=20261124d';
+import { EMPTY } from './track.js?v=20261124d';
 
 export let map;
 const loadedImg = new Map();          // image id -> promise (resolves when added to the map)
 
-export function createMap() {
+export function createMap(style = BASE_STYLE) {
   const saved = lsGet(LS.view, null);
   map = new maplibregl.Map({
     container: 'map',
-    style: BASE_STYLE,
+    style,
     center: saved?.center || HU_VIEW.center,
     zoom: saved?.zoom ?? HU_VIEW.zoom,
     attributionControl: false

@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#1b262b">
   <title>holateher – freight trains live</title>
   <meta name="description" content="Live map of freight trains in Hungary (data: realtimenext.hu)">
-  <link rel="icon" href="favicon.svg?v=20261122i" type="image/svg+xml">
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-  <link rel="stylesheet" href="style.css?v=20261122i">
+  <link rel="icon" href="favicon.svg?v=20261124d" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.24.1/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css?v=20261124d">
 </head>
 <body>
   <div id="map"></div>
@@ -28,6 +28,9 @@
       </label>
       <label class="toggle" title="Also show passenger trains (smaller, behind the freight trains)">
         <input type="checkbox" id="showPass"><span>passenger trains</span>
+      </label>
+      <label class="railsel" title="Railway lines from OpenRailwayMap">
+        <span>Rails</span><select id="railMode" aria-label="Railway layer"></select>
       </label>
       <button id="btnTable" type="button" title="Table of known freight locos">Locos<span class="phone-only">(table)</span></button>
       <button id="btnGoogle" class="iconbtn" type="button" title="Open the current view in Google Maps" aria-label="Open in Google Maps">
@@ -105,11 +108,12 @@
   </section>
 
   <footer class="credits">
-    Data: <a href="https://realtimenext.hu" target="_blank" rel="noopener">realtimenext.hu ↗</a> ·
-    Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap ↗</a> contributors
+    <span class="desk-only">Data:</span> <a href="https://realtimenext.hu" target="_blank" rel="noopener">realtimenext.hu ↗</a> ·
+    <span class="desk-only">Tracks:</span> <a href="https://openrailwaymap.app" target="_blank" rel="noopener">OpenRailwayMap ↗</a> ·
+    <span class="desk-only">Map:</span> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap ↗</a><span class="desk-only"> contributors</span>
   </footer>
 
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <script type="module" src="js/main.js?v=20261122i"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.24.1/maplibre-gl.js"></script>
+  <script type="module" src="js/main.js?v=20261124d"></script>
 </body>
 </html>

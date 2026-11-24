@@ -108,8 +108,13 @@ body.tl-open .status { bottom: calc(var(--dock-h) + var(--foot-h) + 14px); }
 .tools { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: none; }
 .toggle { display: flex; align-items: center; gap: 6px; color: var(--muted); cursor: pointer; white-space: nowrap; user-select: none; }
 .iconbtn { width: 34px; height: 32px; padding: 0; }
+.railsel { display: flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
+.railsel select {
+  font: inherit; color: var(--fg); background: var(--bg2); border: 1px solid var(--line); border-radius: 8px;
+  height: 32px; padding: 0 6px; cursor: pointer; color-scheme: dark;
+}
 .iconbtn svg { width: 18px; height: 18px; }
-@media (max-width: 820px) { .clock { display: none; } }
+@media (max-width: 1150px) { .clock { display: none; } }      /* centred clock would run into the switches */
 
 @media (max-width: 700px) {
   .menubtn {
@@ -137,6 +142,9 @@ body.tl-open .status { bottom: calc(var(--dock-h) + var(--foot-h) + 14px); }
   .tools .toggle span::first-letter { text-transform: uppercase; }
   .tools .toggle span { display: inline-block; }
   .tools .iconbtn svg { display: none; }
+  .tools .railsel { padding: 0; color: var(--fg); gap: 10px; }
+  .tools .railsel span { padding-left: 2px; }
+  .tools .railsel select { flex: 1; height: 40px; font-size: 15px; }
 }
 
 /* ---------- info panel ---------- */

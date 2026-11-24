@@ -1,16 +1,17 @@
 // holateher – start: load static data, create the map and wire the modules. See PLAN.md.
-import { $, on, parseCSV } from './util.js?v=20261122i';
-import { isEvn } from './evn.js?v=20261122i';
-import { fetchIcons, stats } from './api.js?v=20261122i';
-import { state } from './state.js?v=20261122i';
-import { createMap, addVehicleLayers, drawVehicles } from './map.js?v=20261122i';
-import { addTrailLayers } from './trail.js?v=20261122i';
-import { startLive, refresh } from './live.js?v=20261122i';
-import { initMenu, menuOpen, showMenu } from './menu.js?v=20261122i';
-import { initSelection, select, unselect } from './selection.js?v=20261122i';
-import { initTimeline, tl, load, setCursor, backToLive, fitRoute } from './timeline.js?v=20261122i';
-import { initTable, showTable, tableOpen } from './table.js?v=20261122i';
-import { initDebug, toggleDebug } from './debug.js?v=20261122i';
+import { $, on, parseCSV } from './util.js?v=20261124d';
+import { isEvn } from './evn.js?v=20261124d';
+import { fetchIcons, stats } from './api.js?v=20261124d';
+import { state } from './state.js?v=20261124d';
+import { createMap, addVehicleLayers, drawVehicles } from './map.js?v=20261124d';
+import { addTrailLayers } from './trail.js?v=20261124d';
+import { startLive, refresh } from './live.js?v=20261124d';
+import { initMenu, menuOpen, showMenu } from './menu.js?v=20261124d';
+import { initSelection, select, unselect } from './selection.js?v=20261124d';
+import { initTimeline, tl, load, setCursor, backToLive, fitRoute } from './timeline.js?v=20261124d';
+import { initTable, showTable, tableOpen } from './table.js?v=20261124d';
+import { initDebug, toggleDebug } from './debug.js?v=20261124d';
+import { loadRailStyle, buildStyle, initRails } from './rails.js?v=20261124d';
 
 const text = url => fetch(url, { cache: 'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => '');
 
@@ -21,8 +22,9 @@ async function loadStatic() {
   for (const [id, url] of icons) state.iconUrl.set(id, url);
 }
 
-const map = createMap();
 const staticReady = loadStatic();
+const map = createMap(buildStyle(await loadRailStyle()));   // base map + railway lines in one style
+initRails(map);
 initMenu();
 initTimeline();
 initSelection();
@@ -42,7 +44,8 @@ document.addEventListener('keydown', e => {
 new ResizeObserver(([e]) => document.body.style.setProperty('--dock-h', Math.ceil(e.borderBoxSize?.[0]?.blockSize ?? e.target.offsetHeight) + 'px'))
   .observe($('dock'));
 
-map.on('load', async () => {
+// style.load, not load: load waits for every railway tile, the trains should not wait for that
+map.once('style.load', async () => {
   addVehicleLayers();
   addTrailLayers('vehicle-sel');
   await staticReady;

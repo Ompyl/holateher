@@ -232,13 +232,13 @@ Wahrheit statt der alten Ungarn.xlsx). Beschreibungen bleiben wie sie sind (teil
 `data/bildkategorien.csv`: `kategorie,bild` (noch leer).
 
 ### localStorage-Schlüssel
-`holateher.view`, `.showIdle`, `.showPassenger`, `.seenFreight`, `.modelIcons`, `.allCols`, `.playSpeed`, `.icons` (Icon-Liste + Zeit).
+`holateher.view`, `.showIdle`, `.showPassenger`, `.seenFreight`, `.modelIcons`, `.allCols`, `.playSpeed`, `.icons` (Icon-Liste + Zeit), `.railMode` (Schienen-Ebene: off / usage / voltage_frequency / train_protection).
 
 ---
 
 ## Stolpersteine (Lessons learned)
 
-- **MapLibre (4.7.1):** Ein Zoom-`step`/`interpolate` darf nur ganz außen im Ausdruck stehen (auch nicht in einem
+- **MapLibre (5.24.1, cdnjs):** Ein Zoom-`step`/`interpolate` darf nur ganz außen im Ausdruck stehen (auch nicht in einem
   `case`), sonst wird die ganze Ebene stumm abgelehnt (`addLayer` wirft, Ebene fehlt). Lösung: `case` in die
   Stufen des `step` legen. Zoom in Filtern vermeiden, lieber `minzoom`.
 - **Browser-Cache:** GitHub Pages lässt Dateien 10 min cachen. Neue `app.js` + alte `common.js` → Funktion fehlt →
@@ -249,6 +249,15 @@ Wahrheit statt der alten Ungarn.xlsx). Beschreibungen bleiben wie sie sind (teil
 - **OpenRailwayMap als Ebene:** `style.json` von openrailwaymap.app hat kein CORS und braucht MapLibre ≥ 5.
   Die Vektor-Kacheln (`/standard_railway_line_low` bis z7, `/railway_line_high,railway_text_km` ab z7, normales MVT)
   gehen mit echtem Referer. Nutzungsregeln: https://github.com/hiddewie/OpenRailwayMap-vector/blob/master/USAGE.md.
+  **Umsetzung:** `node tools/fetch-orm-style.mjs` lädt den Stil (ehrlicher User-Agent), räumt ihn auf (Hillshade,
+  ORM-Grundkarte, Routing, Suche raus; absolute URLs; ohne `encoding: "mlt"`; Schriften → protomaps-Glyphen;
+  dunkles Theme) und schreibt `data/ormstyle.json` (~1,1 MB, gzip ~50 kB, wird committet; ab und zu neu holen).
+  `js/rails.js` baut daraus zusammen mit der OSM-Grundkarte **einen** Stil; die eigenen Ebenen kommen darüber.
+  Umschalter Off / Tracks / Electrification / Train protection = globaler Zustand `tracks`
+  (`map.setGlobalStateProperty`); Off = alle ORM-Ebenen `visibility: none` (lädt dann keine Kacheln), beim
+  Einschalten die ursprünglichen Sichtbarkeits-Ausdrücke zurück. Fehlt der Stil: ORM-Raster-Kacheln (nur Off/Tracks).
+  Eigene Ebenen in `style.load` anlegen, nicht in `load`: `load` wartet auf alle Schienen-Kacheln (Loks kämen
+  sonst erst nach Sekunden).
 - **Tile-Nutzung OSM:** Quellenangabe Pflicht, keine Massen-Downloads.
 - **Tooltip** nur mit echter Maus (Handys haben kein Hover).
 - **Lokaler Server fürs Handy** nur im Projektordner starten (sonst ist der ganze HOP-Ordner im WLAN lesbar):
@@ -319,6 +328,8 @@ Wahrheit statt der alten Ungarn.xlsx). Beschreibungen bleiben wie sie sind (teil
 | `js/selection.js` | Auswahl, Infofeld, Adresse `?loco=`, Zurück-Taste |
 | `js/table.js` | Loco-Tabelle + Excel-Export |
 | `js/menu.js` | Kopfzeile/Menü, Schalter, Zähler, Uhr + Easter Egg |
+| `js/rails.js` | Schienen-Ebene von OpenRailwayMap (Vektor, Original-Stil dunkel) + Umschalter |
+| `tools/fetch-orm-style.mjs` | holt und bereinigt den ORM-Stil → `data/ormstyle.json` |
 | `js/debug.js` | Debug-Ansicht (F3 oder `?debug`): Zoom, Mitte, Live-Status, Anfragen/Traffic, Caches, Zeitachse, Rohdaten der gewählten Lok / der Lok unter der Maus |
 | `tools/bump-version.mjs` | neue `?v=` an alle eigenen Dateien |
 | `history.html` | Weiterleitung alter Links |

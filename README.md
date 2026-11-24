@@ -48,6 +48,8 @@ Plain static site, no build step: ES modules loaded directly by the browser.
 | `js/track.js` | route calculations (speed, stops, trains) |
 | `js/timeline.js`, `js/calendar.js` | timeline of the selected loco |
 | `js/selection.js`, `js/table.js`, `js/menu.js` | info panel, loco table, header / phone menu |
+| `js/rails.js`, `data/ormstyle.json` | railway lines from OpenRailwayMap (vector tiles) with Off / Tracks / Electrification / Train protection |
+| `tools/fetch-orm-style.mjs` | refreshes `data/ormstyle.json` from openrailwaymap.app |
 | `js/debug.js` | debug view: F3, or `?debug` in the address (phones) |
 | `js/config.js`, `js/util.js`, `js/evn.js`, `js/state.js` | constants, helpers, vehicle numbers, shared state |
 | `tools/bump-version.mjs` | puts a new `?v=` on all own files – run before every deploy |

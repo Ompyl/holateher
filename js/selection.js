@@ -1,10 +1,10 @@
 // holateher – selecting a loco: info panel, timeline, ?loco= address, back button closes the selection.
-import { SPEED_STOPS, SPEED_CAP } from './config.js?v=20261122i';
-import { $, esc, on } from './util.js?v=20261122i';
-import { fmtEvn, kindOf, countryOf, shortNo, locoUrl, vehicleUrl, photosUrl } from './evn.js?v=20261122i';
-import { state, kindOfLive, lastFreightText, delayText, motionText } from './state.js?v=20261122i';
-import { drawVehicles, showOtherVehicles } from './map.js?v=20261122i';
-import { openTimeline, closeTimeline, liveUpdate } from './timeline.js?v=20261122i';
+import { SPEED_STOPS, SPEED_CAP } from './config.js?v=20261124d';
+import { $, esc, on } from './util.js?v=20261124d';
+import { fmtEvn, kindOf, countryOf, shortNo, locoUrl, vehicleUrl, photosUrl } from './evn.js?v=20261124d';
+import { state, kindOfLive, lastFreightText, delayText, motionText } from './state.js?v=20261124d';
+import { drawVehicles, showOtherVehicles } from './map.js?v=20261124d';
+import { openTimeline, closeTimeline, liveUpdate } from './timeline.js?v=20261124d';
 
 export const ICONS = {
   info: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></g></svg>',

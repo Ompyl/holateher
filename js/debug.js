@@ -1,12 +1,12 @@
 // holateher – debug view (F3, or ?debug in the address for phones): map, live polling, traffic, selection.
 // Costs nothing while closed; while open it only reads state (no extra requests).
-import { POLL_MS, INACTIVE_MS, PAST_DAYS_CACHE } from './config.js?v=20261122i';
-import { $, esc, hhmmss } from './util.js?v=20261122i';
-import { stats, cacheInfo } from './api.js?v=20261122i';
-import { state, kindOfLive } from './state.js?v=20261122i';
-import { liveInfo } from './live.js?v=20261122i';
-import { map } from './map.js?v=20261122i';
-import { tl } from './timeline.js?v=20261122i';
+import { POLL_MS, INACTIVE_MS, PAST_DAYS_CACHE } from './config.js?v=20261124d';
+import { $, esc, hhmmss } from './util.js?v=20261124d';
+import { stats, cacheInfo } from './api.js?v=20261124d';
+import { state, kindOfLive } from './state.js?v=20261124d';
+import { liveInfo } from './live.js?v=20261124d';
+import { map } from './map.js?v=20261124d';
+import { tl } from './timeline.js?v=20261124d';
 
 const VERSION = new URL(import.meta.url).searchParams.get('v') || 'dev';
 let box = null, timer = null, frames = 0, fps = 0, fpsT = 0, mouse = null, hoverEvn = null;

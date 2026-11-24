@@ -29,13 +29,14 @@ export const LS = {
   modelIcons: 'holateher.modelIcons',
   allCols: 'holateher.allCols',
   playSpeed: 'holateher.playSpeed',
-  icons: 'holateher.icons'
+  icons: 'holateher.icons',
+  railMode: 'holateher.railMode'
 };
 
 // Base map: OSM raster tiles, darkened like OpenRailwayMap's dark theme (saturation 50 %, opacity 50 % over the page colour)
 export const BASE_STYLE = {
   version: 8,
-  glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+  glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',   // same as the railway style
   sources: {
     osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19 }
   },
